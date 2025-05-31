@@ -2,11 +2,11 @@
 
 [Full report](https://htmlpreview.github.io/?https://github.com/MaineDSA/zillow_scraper/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-| Name                |    Stmts |     Miss |  Cover |   Missing |
-|-------------------- | -------: | -------: | -----: | --------: |
-| src/\_\_init\_\_.py |        0 |        0 |   100% |           |
-| src/main.py         |       61 |       61 |     0% |     1-103 |
-|           **TOTAL** |   **61** |   **61** | **0%** |           |
+| Name                |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
+|-------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
+| src/\_\_init\_\_.py |        0 |        0 |        0 |        0 |    100% |           |
+| src/main.py         |       54 |       24 |        4 |        1 |     53% |62-88, 92-94 |
+|           **TOTAL** |   **54** |   **24** |    **4** |    **1** | **53%** |           |
 
 
 ## Setup coverage badge
