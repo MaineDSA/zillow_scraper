@@ -57,8 +57,7 @@ jobs:
           path: .pytest_cache
           key: ${{ runner.os }}-pytest-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
 
-      - name: Run pytest (with headless support)
-        uses: GabrielBB/xvfb-action@5bcda06da84ba084708898801da79736b88e00a9
+      - uses: GabrielBB/xvfb-action@5bcda06da84ba084708898801da79736b88e00a9
         env:
           COVERAGE_FILE: .coverage.${{ runner.os }}.${{ matrix.python-version }}
         with:
