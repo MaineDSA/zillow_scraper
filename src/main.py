@@ -1,14 +1,15 @@
 import asyncio
 import logging
 import re
-import time
 from random import SystemRandom
 from typing import ClassVar
 
 from bs4 import BeautifulSoup, NavigableString, Tag
+from patchright.async_api import Error as PlaywrightError
 from patchright.async_api import Page, ViewportSize, async_playwright
 from tqdm import tqdm
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
 
@@ -32,6 +33,95 @@ class GoogleFormConstants:
 
 class ZillowParseError(Exception):
     """Custom exception for Zillow scraping errors."""
+
+
+async def _scroll_and_load_listings(page: Page, max_entries: int = 100) -> None:
+    """Scroll through search results to trigger lazy loading."""
+    await page.wait_for_selector("#search-page-list-container", timeout=10000)
+
+    previous_count = 0
+    no_change_iterations = 0
+    max_no_change = 5  # Stop after 5 iterations with no new content
+
+    for iteration in range(50):  # Max 50 scroll attempts
+        # Count current property cards
+        current_cards = await page.query_selector_all('article[data-test="property-card"]')
+        current_count = len(current_cards)
+
+        msg = f"Iteration {iteration + 1}: Found {current_count} property cards"
+        logger.info(msg)
+
+        # Check if we've reached the target or stopped loading new content
+        if current_count >= max_entries:
+            msg = f"Reached target of {max_entries} entries"
+            logger.info(msg)
+            break
+
+        if current_count == previous_count:
+            no_change_iterations += 1
+            if no_change_iterations >= max_no_change:
+                logger.info("No new content loaded after several attempts, stopping")
+                break
+        else:
+            no_change_iterations = 0
+
+        previous_count = current_count
+
+        # Scroll down by a random amount (simulate human-like scrolling)
+        scroll_amount = cryptogen.randint(300, 800)  # Random scroll distance
+
+        # Try to find the search container and scroll within it
+        try:
+            # First try scrolling within the search container
+            await page.evaluate(f"""
+                const searchContainer = document.getElementById('search-page-list-container');
+                if (searchContainer) {{
+                    searchContainer.scrollTop += {scroll_amount};
+                }} else {{
+                // Fallback to window scroll
+                    window.scrollBy(0, {scroll_amount});
+                }}
+            """)
+        except PlaywrightError as e:
+            wrn = f"Scroll attempt failed: {e}, trying window scroll"
+            logger.warning(wrn)
+            await page.evaluate(f"window.scrollBy(0, {scroll_amount})")
+
+        # Random wait time between scrolls (1-4 seconds)
+        wait_time = cryptogen.randint(1000, 4000)
+        await page.wait_for_timeout(wait_time)
+
+        # Occasionally scroll back up a bit to simulate more natural browsing
+        if iteration % 7 == 0 and iteration > 0:
+            back_scroll = cryptogen.randint(100, 300)
+            await page.evaluate(f"""
+                const searchContainer = document.getElementById('search-page-list-container');
+                if (searchContainer) {{
+                    searchContainer.scrollTop -= {back_scroll};
+                }} else {{
+                    window.scrollBy(0, -{back_scroll});
+                }}
+            """)
+            await page.wait_for_timeout(cryptogen.randint(500, 1500))
+
+    # Final count
+    final_cards = await page.query_selector_all('article[data-test="property-card"]')
+    final_count = len(final_cards)
+    msg = f"Lazy loading complete. Total property cards loaded: {final_count}"
+    logger.info(msg)
+
+    # Scroll back to top to ensure all content is properly rendered
+    await page.evaluate("""
+        const searchContainer = document.getElementById('search-page-list-container');
+        if (searchContainer) {
+            searchContainer.scrollTop = 0;
+        } else {
+            window.scrollTo(0, 0);
+        }
+    """)
+
+    # Wait a bit for any final rendering
+    await page.wait_for_timeout(2000)
 
 
 def _parse_address(card: Tag) -> str:
@@ -311,7 +401,8 @@ async def main(url: str = ZillowURLs.ZILLOW_URL) -> None:
         page = await context.new_page()
 
         await page.goto(url)
-        time.sleep(30)
+
+        await _scroll_and_load_listings(page)
 
         html = await page.content()
         soup = BeautifulSoup(html, "html.parser")

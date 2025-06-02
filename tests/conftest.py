@@ -7,7 +7,7 @@ import pytest_asyncio
 from bs4 import BeautifulSoup
 from patchright.async_api import ViewportSize, async_playwright
 
-from src.main import ZillowHomeFinder, ZillowURLs
+from src.main import ZillowHomeFinder, ZillowURLs, _scroll_and_load_listings
 
 
 def pytest_runtest_setup(item: pytest_asyncio.plugin.Coroutine) -> None:
@@ -46,6 +46,7 @@ async def homefinder_zillow_live() -> AsyncGenerator[ZillowHomeFinder]:
         )
         page = await context.new_page()
         await page.goto(ZillowURLs.ZILLOW_URL)
+        await _scroll_and_load_listings(page)
 
         html = await page.content()
         soup = BeautifulSoup(html, "html.parser")
