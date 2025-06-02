@@ -177,11 +177,11 @@ def _format_price_range(prices: list[str]) -> str:
 
 def _validate_card_basics(address: str, main_link: str) -> None:
     """Validate that card has required basic information."""
-    if not address or not main_link:
+    if not address or not address.strip() or not main_link or not main_link.strip():
         missing = []
-        if not address:
+        if not address or not address.strip():
             missing.append("Address")
-        if not main_link:
+        if not main_link or not main_link.strip():
             missing.append("Link")
         err = f"Missing {', '.join(missing)} in card."
         raise ZillowParseError(err)
