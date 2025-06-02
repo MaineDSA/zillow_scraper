@@ -2,11 +2,17 @@
 
 [Full report](https://htmlpreview.github.io/?https://github.com/MaineDSA/zillow_scraper/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-| Name                |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
-|-------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
-| src/\_\_init\_\_.py |        0 |        0 |        0 |        0 |    100% |           |
-| src/main.py         |      242 |       31 |       74 |        9 |     87% |224-225, 234, 238, 251, 255, 269, 272->275, 301, 333-334, 340-346, 381-382, 387-405, 409 |
-|           **TOTAL** |  **242** |   **31** |   **74** |    **9** | **87%** |           |
+| Name                       |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
+|--------------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
+| src/\_\_init\_\_.py        |        0 |        0 |        0 |        0 |    100% |           |
+| src/browser\_automation.py |       50 |        0 |       12 |        0 |    100% |           |
+| src/constants.py           |       10 |        0 |        0 |        0 |    100% |           |
+| src/exceptions.py          |        1 |        0 |        0 |        0 |    100% |           |
+| src/form\_submission.py    |       13 |        7 |        0 |        0 |     46% |     13-19 |
+| src/main.py                |       24 |       24 |        2 |        0 |      0% |      1-41 |
+| src/parsers.py             |      134 |       10 |       52 |        8 |     90% |96-97, 106, 110, 123, 127, 141, 144->147, 173, 205-206 |
+| src/scraper.py             |       34 |        2 |        8 |        0 |     90% |     50-51 |
+|                  **TOTAL** |  **266** |   **43** |   **74** |    **8** | **84%** |           |
 
 
 ## Setup coverage badge
