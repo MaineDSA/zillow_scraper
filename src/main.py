@@ -104,14 +104,16 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_c
         scroll_up_chance: float = 0.15
         if iteration > 0 and cryptogen.random() < scroll_up_chance:
             back_scroll = cryptogen.randint(100, 300)
-            await page.evaluate(f"""
-                const searchContainer = document.querySelector('[class*="search-page-list-container"]');
-                if (searchContainer) {{
-                    searchContainer.scrollTop -= {back_scroll};
-                }} else {{
-                    window.scrollBy(0, -{back_scroll});
-                }}
-            """)
+            try:
+                await page.evaluate(f"""
+                    const searchContainer = document.querySelector('[class*="search-page-list-container"]');
+                    searchContainer.scrollTop += {back_scroll};
+                """)
+            except PlaywrightError as e:
+                wrn = f"Scroll attempt failed: {e}, trying window scroll"
+                logger.warning(wrn)
+                await page.evaluate(f"window.scrollBy(0, -{back_scroll})")
+
             await page.wait_for_timeout(cryptogen.randint(500, 1500))
 
     final_cards = await page.query_selector_all('article[data-test="property-card"]')
