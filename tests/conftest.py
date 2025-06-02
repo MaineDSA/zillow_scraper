@@ -26,6 +26,7 @@ async def homefinder_clone_live() -> AsyncGenerator[ZillowHomeFinder]:
         )
         page = await context.new_page()
         await page.goto(ZillowURLs.CLONE_URL)
+        await _scroll_and_load_listings(page)
 
         html = await page.content()
         soup = BeautifulSoup(html, "html.parser")
