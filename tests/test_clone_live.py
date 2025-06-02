@@ -1,6 +1,32 @@
-import pytest
+from collections.abc import AsyncGenerator
 
-from src.main import ZillowHomeFinder
+import pytest
+import pytest_asyncio
+from bs4 import BeautifulSoup
+from patchright.async_api import ViewportSize, async_playwright
+
+from src.main import ZillowHomeFinder, ZillowURLs, _scroll_and_load_listings
+
+
+@pytest_asyncio.fixture(scope="module")
+async def homefinder_clone_live() -> AsyncGenerator[ZillowHomeFinder]:
+    """Use Playwright to fetch the Zillow Clone HTML and return a ZillowHomeFinder instance."""
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+            viewport=ViewportSize(width=1920, height=1080),
+        )
+        page = await context.new_page()
+        await page.goto(ZillowURLs.CLONE_URL)
+        await _scroll_and_load_listings(page)
+
+        html = await page.content()
+        soup = BeautifulSoup(html, "html.parser")
+
+        yield ZillowHomeFinder(soup)
+
+        await browser.close()
 
 
 @pytest.mark.asyncio
