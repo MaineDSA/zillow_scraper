@@ -35,7 +35,7 @@ class ZillowParseError(Exception):
     """Custom exception for Zillow scraping errors."""
 
 
-async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_change: int = 5, max_scroll_attempts: int = 50) -> None:
+async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_change: int = 3, max_scroll_attempts: int = 50) -> None:
     """Scroll through search results to trigger lazy loading."""
     await page.wait_for_selector('[class*="search-page-list-container"]', timeout=10000)
 
@@ -53,6 +53,25 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_c
             msg = f"Reached target of {max_entries} entries"
             logger.info(msg)
             break
+
+        # Check if we've reached the bottom of the page (element is visible on screen)
+        bottom_element = await page.query_selector("div.search-list-save-search-parent")
+        if bottom_element:
+            # Check if the element is actually visible in the viewport
+            is_visible = await page.evaluate(
+                """
+                (element) => {
+                    const rect = element.getBoundingClientRect();
+                    return rect.top < window.innerHeight && rect.bottom > 0;
+                }
+            """,
+                bottom_element,
+            )
+
+            if is_visible:
+                msg = "Reached bottom of page (search-list-save-search-parent element is visible)"
+                logger.info(msg)
+                break
 
         if current_count == previous_count:
             no_change_iterations += 1
