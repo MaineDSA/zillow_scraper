@@ -89,12 +89,7 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_c
         try:
             await page.evaluate(f"""
                 const searchContainer = document.querySelector('[class*="search-page-list-container"]');
-                if (searchContainer) {{
-                    searchContainer.scrollTop += {scroll_amount};
-                }} else {{
-                    // Fallback to window scroll
-                    window.scrollBy(0, {scroll_amount});
-                }}
+                searchContainer.scrollTop += {scroll_amount};
             """)
         except PlaywrightError as e:
             wrn = f"Scroll attempt failed: {e}, trying window scroll"
