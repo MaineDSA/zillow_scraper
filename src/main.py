@@ -35,14 +35,12 @@ class ZillowParseError(Exception):
     """Custom exception for Zillow scraping errors."""
 
 
-async def _scroll_and_load_listings(page: Page, max_entries: int = 100) -> None:
+async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_change: int = 5, max_scroll_attempts: int = 50) -> None:
     """Scroll through search results to trigger lazy loading."""
     await page.wait_for_selector('[class*="search-page-list-container"]', timeout=10000)
 
     previous_count = 0
     no_change_iterations = 0
-    max_no_change = 6
-    max_scroll_attempts = 66
 
     for iteration in range(max_scroll_attempts):
         current_cards = await page.query_selector_all('article[data-test="property-card"]')
