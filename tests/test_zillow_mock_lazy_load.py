@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.main import _scroll_and_load_listings
+from src.browser_automation import _scroll_and_load_listings
 
 
 @pytest.mark.asyncio

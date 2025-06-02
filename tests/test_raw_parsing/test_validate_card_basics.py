@@ -2,7 +2,8 @@ import re
 
 import pytest
 
-from src.main import ZillowParseError, _validate_card_basics
+from src.exceptions import ZillowParseError
+from src.parsers import _validate_card_basics
 
 
 @pytest.mark.parametrize(

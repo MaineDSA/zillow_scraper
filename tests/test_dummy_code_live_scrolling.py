@@ -3,7 +3,7 @@ from _pytest.logging import LogCaptureFixture
 from patchright.async_api import TimeoutError as PlaywrightTimeoutError
 from patchright.async_api import ViewportSize, async_playwright
 
-from src.main import _scroll_and_load_listings
+from src.browser_automation import _scroll_and_load_listings
 
 
 @pytest.mark.asyncio

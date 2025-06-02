@@ -6,7 +6,9 @@ import pytest_asyncio
 from bs4 import BeautifulSoup
 from patchright.async_api import ViewportSize, async_playwright
 
-from src.main import ZillowHomeFinder, ZillowURLs, _scroll_and_load_listings
+from src.browser_automation import _scroll_and_load_listings
+from src.constants import ZillowURLs
+from src.scraper import ZillowHomeFinder
 
 
 @pytest_asyncio.fixture(scope="module")
