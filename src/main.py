@@ -37,21 +37,20 @@ class ZillowParseError(Exception):
 
 async def _scroll_and_load_listings(page: Page, max_entries: int = 100) -> None:
     """Scroll through search results to trigger lazy loading."""
-    await page.wait_for_selector("#search-page-list-container", timeout=10000)
+    await page.wait_for_selector('[class*="search-page-list-container"]', timeout=10000)
 
     previous_count = 0
     no_change_iterations = 0
-    max_no_change = 5  # Stop after 5 iterations with no new content
+    max_no_change = 6
+    max_scroll_attempts = 66
 
-    for iteration in range(50):  # Max 50 scroll attempts
-        # Count current property cards
+    for iteration in range(max_scroll_attempts):
         current_cards = await page.query_selector_all('article[data-test="property-card"]')
         current_count = len(current_cards)
 
         msg = f"Iteration {iteration + 1}: Found {current_count} property cards"
         logger.info(msg)
 
-        # Check if we've reached the target or stopped loading new content
         if current_count >= max_entries:
             msg = f"Reached target of {max_entries} entries"
             logger.info(msg)
@@ -68,17 +67,15 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100) -> None:
         previous_count = current_count
 
         # Scroll down by a random amount (simulate human-like scrolling)
-        scroll_amount = cryptogen.randint(300, 800)  # Random scroll distance
+        scroll_amount = cryptogen.randint(300, 800)
 
-        # Try to find the search container and scroll within it
         try:
-            # First try scrolling within the search container
             await page.evaluate(f"""
-                const searchContainer = document.getElementById('search-page-list-container');
+                const searchContainer = document.querySelector('[class*="search-page-list-container"]');
                 if (searchContainer) {{
                     searchContainer.scrollTop += {scroll_amount};
                 }} else {{
-                // Fallback to window scroll
+                    // Fallback to window scroll
                     window.scrollBy(0, {scroll_amount});
                 }}
             """)
@@ -95,7 +92,7 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100) -> None:
         if iteration % 7 == 0 and iteration > 0:
             back_scroll = cryptogen.randint(100, 300)
             await page.evaluate(f"""
-                const searchContainer = document.getElementById('search-page-list-container');
+                const searchContainer = document.querySelector('[class*="search-page-list-container"]');
                 if (searchContainer) {{
                     searchContainer.scrollTop -= {back_scroll};
                 }} else {{
@@ -104,7 +101,6 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100) -> None:
             """)
             await page.wait_for_timeout(cryptogen.randint(500, 1500))
 
-    # Final count
     final_cards = await page.query_selector_all('article[data-test="property-card"]')
     final_count = len(final_cards)
     msg = f"Lazy loading complete. Total property cards loaded: {final_count}"
@@ -112,16 +108,14 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100) -> None:
 
     # Scroll back to top to ensure all content is properly rendered
     await page.evaluate("""
-        const searchContainer = document.getElementById('search-page-list-container');
+        const searchContainer = document.querySelector('[class*="search-page-list-container"]');
         if (searchContainer) {
             searchContainer.scrollTop = 0;
         } else {
             window.scrollTo(0, 0);
         }
     """)
-
-    # Wait a bit for any final rendering
-    await page.wait_for_timeout(2000)
+    await page.wait_for_timeout(1500)
 
 
 def _parse_address(card: Tag) -> str:
@@ -153,10 +147,7 @@ def _clean_price_text(price_text: str) -> str:
 
 def _extract_numeric_price(price_text: str) -> int:
     """Extract numeric value from price text for comparison."""
-    # Remove all non-digit characters except commas and periods
-    numeric_only = re.sub(r"[^\d,.]", "", price_text)
-    # Remove commas
-    numeric_only = numeric_only.replace(",", "")
+    numeric_only = re.sub(r"[^\d,.]", "", price_text).replace(",", "")
     try:
         return int(float(numeric_only))
     except (ValueError, TypeError):
@@ -171,21 +162,14 @@ def _format_price_range(prices: list[str]) -> str:
     if len(prices) == 1:
         return prices[0]
 
-    # Extract numeric values for sorting
     price_values = [(price, _extract_numeric_price(price)) for price in prices]
-    # Filter out prices that couldn't be parsed
     valid_prices = [(price, value) for price, value in price_values if value > 0]
-
     if not valid_prices:
-        return prices[0]  # Fallback to first price if none could be parsed
-
-    # Sort by numeric value
+        return prices[0]
     valid_prices.sort(key=lambda x: x[1])
 
     min_price = valid_prices[0][0]
     max_price = valid_prices[-1][0]
-
-    # If min and max are the same, return single price
     if valid_prices[0][1] == valid_prices[-1][1]:
         return min_price
 
@@ -213,7 +197,6 @@ def _extract_available_units_count(card: Tag) -> int:
     badges = badge_area.find_all("span", class_=re.compile(r"StyledPropertyCardBadge"))
     for badge in badges:
         badge_text = badge.get_text(strip=True).lower()
-        # Look for patterns like "2 available units", "3 units available", etc.
         unit_match = re.search(r"(\d+)\s+(?:available\s+)?units?", badge_text)
         if unit_match:
             try:
@@ -234,10 +217,8 @@ def _extract_main_price(card: Tag, address: str, main_link: str) -> list[tuple[s
     if not price_text:
         return []
 
-    # Check if there are multiple available units
     units_count = _extract_available_units_count(card)
 
-    # For main price, we don't create multiple entries for units since there's only one price
     unit_suffix = f" ({units_count} units available)" if units_count > 1 else ""
     final_address = f"{address}{unit_suffix}"
 
@@ -278,17 +259,14 @@ def _parse_inventory_data(inventory_section: Tag) -> list[tuple[str, str]]:
 
 def _create_inventory_entry(address: str, main_link: str, price: str, bed_info: str, units_count: int) -> tuple[str, str, str]:
     """Create a single inventory entry with proper formatting."""
-    # Create address with bedroom info
     bed_address = f"{address} ({bed_info})" if bed_info else address
 
-    # Add unit count if multiple units
     if units_count > 1:
         bed_address = f"{bed_address} ({units_count} units available)"
 
-    # Create specific link
     specific_link = _create_specific_link(main_link, bed_info)
 
-    return (bed_address, price, specific_link)
+    return bed_address, price, specific_link
 
 
 def _extract_inventory_prices(card: Tag, address: str, main_link: str) -> list[tuple[str, str, str]]:
@@ -302,20 +280,15 @@ def _extract_inventory_prices(card: Tag, address: str, main_link: str) -> list[t
     if not inventory_data:
         return []
 
-    # Get unit count
     units_count = _extract_available_units_count(card)
 
-    # If multiple units AND multiple price variations, consolidate into single entry with price range
     if units_count > 1 and len(inventory_data) > 1:
         prices = [price for price, _ in inventory_data]
         price_range = _format_price_range(prices)
-
-        # Create single consolidated address
         final_address = f"{address} ({units_count} units available)"
 
         return [(final_address, price_range, main_link)]
 
-    # Otherwise, create separate entries for each price/bedroom combination
     results = []
     for price, bed_info in inventory_data:
         entry = _create_inventory_entry(address, main_link, price, bed_info, units_count)
@@ -334,7 +307,6 @@ def _parse_zillow_card(card: Tag) -> list[tuple[str, str, str]]:
     main_prices = _extract_main_price(card, address, main_link)
     inventory_prices = _extract_inventory_prices(card, address, main_link)
 
-    # Prioritize inventory prices if available, otherwise use main prices
     results = inventory_prices if inventory_prices else main_prices
 
     if not results:
