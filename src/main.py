@@ -140,8 +140,13 @@ def _parse_main_link(card: Tag) -> str:
 
 def _clean_price_text(price_text: str) -> str:
     """Clean and standardize price text."""
-    cleaned = re.sub(r"\+?\s*\d+\s*bd?s?", "", price_text, flags=re.IGNORECASE)
-    return cleaned.replace("+", "").replace("/mo", "").strip()
+    cleaned = re.sub(r"\+?\s*\d+\s*bds?(?:\s|$)", "", price_text, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\+?\s*bd(?:\s|$)", "", cleaned, flags=re.IGNORECASE)
+    cleaned = cleaned.replace("utilities", "")
+    cleaned = cleaned.replace("/mo", "")
+    cleaned = cleaned.replace("+", "")
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    return cleaned.strip()
 
 
 def _extract_numeric_price(price_text: str) -> int:
