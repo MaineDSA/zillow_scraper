@@ -36,7 +36,7 @@ The responses are stored in a connected Google Spreadsheet for easy tracking.
 1. Run the script:
 
     ```shell
-    python main.py
+    python src/main.py
     ```
 
 The script will open a Chrome window, scrape data from the Zillow clone, and submit each entry into your form.
