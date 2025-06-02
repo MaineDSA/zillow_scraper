@@ -350,19 +350,20 @@ class ZillowHomeFinder:
     """Scrape property data from a Zillow soup object."""
 
     def __init__(self, soup: BeautifulSoup) -> None:
+        self.cards: list[Tag] = []
         self.addresses: list[str] = []
         self.prices: list[str] = []
         self.links: list[str] = []
 
-        cards = soup.find_all("article", attrs={"data-test": "property-card"})
-        if not cards:
+        self.cards = soup.find_all("article", attrs={"data-test": "property-card"})
+        if not self.cards:
             err = "No property cards found."
             raise ZillowParseError(err)
 
-        msg = f"Found {len(cards)} property cards to parse"
+        msg = f"Found {len(self.cards)} property cards to parse"
         logger.info(msg)
 
-        for i, card in enumerate(cards):
+        for i, card in enumerate(self.cards):
             try:
                 card_results = _parse_zillow_card(card)
                 msg = f"Card {i + 1}: Found {len(card_results)} entries"
