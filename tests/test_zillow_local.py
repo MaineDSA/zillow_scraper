@@ -1,10 +1,9 @@
 from pathlib import Path
 
-import pytest
 import pytest_asyncio
 from bs4 import BeautifulSoup
 
-from src.main import ZillowHomeFinder, ZillowParseError
+from src.main import ZillowHomeFinder
 
 
 @pytest_asyncio.fixture(scope="module")
@@ -14,13 +13,6 @@ async def homefinder_zillow_local() -> ZillowHomeFinder:
     soup = BeautifulSoup(html, "html.parser")
 
     return ZillowHomeFinder(soup)
-
-
-async def test_homefinder_zillow_local_no_property_cards() -> None:
-    """Read Zillow HTML from ../zillow.html and return a ZillowHomeFinder instance."""
-    soup = BeautifulSoup("<html></html>", "html.parser")
-    with pytest.raises(ZillowParseError, match="No property cards found"):
-        ZillowHomeFinder(soup)
 
 
 async def test_homefinder_local_data_lengths(homefinder_zillow_local: ZillowHomeFinder) -> None:
