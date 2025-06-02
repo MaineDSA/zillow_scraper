@@ -18,7 +18,7 @@ The responses are stored in a connected Google Spreadsheet for easy tracking.
 ## Requirements
 
 - Python 3.11 or higher
-- Chrome and ChromeDriver installed
+- Linux, Windows, macOS
 
 ## How to Use
 
@@ -28,7 +28,7 @@ The responses are stored in a connected Google Spreadsheet for easy tracking.
 
     ```shell
     pip install -r .\pyproject.toml
-    playwright install
+    patchright install
     ```
 
 1. In `src/main.py`, update `GoogleFormConstants.FORM_URL` to match your Google Form
