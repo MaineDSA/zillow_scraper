@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/main.py: 84%</title>
+    <title>Coverage for src/main.py: 85%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_8e611ae1.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>src/main.py</b>:
-            <span class="pc_cov">84%</span>
+            <span class="pc_cov">85%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -56,10 +56,10 @@
         </aside>
         <h2>
             <span class="text">242 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">203<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">39<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">205<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">37<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">11<span class="text"> excluded</span></button>
-            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">11<span class="text"> partial</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">9<span class="text"> partial</span></button>
         </h2>
         <p class="text">
             <a id="prevFileLink" class="nav" href="index.html">&#xab; prev</a> &nbsp; &nbsp;
@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.1">coverage.py v7.8.1</a>,
-            created at 2025-06-02 20:29 +0000
+            created at 2025-06-02 20:47 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -228,12 +228,12 @@
     <p class="run"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t"><span class="key">def</span> <span class="nam">_parse_main_link</span><span class="op">(</span><span class="nam">card</span><span class="op">:</span> <span class="nam">Tag</span><span class="op">)</span> <span class="op">-></span> <span class="nam">str</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">    <span class="str">"""Extract main property link from a property card."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">    <span class="nam">link_element</span> <span class="op">=</span> <span class="nam">card</span><span class="op">.</span><span class="nam">find</span><span class="op">(</span><span class="str">"a"</span><span class="op">,</span> <span class="nam">class_</span><span class="op">=</span><span class="str">"property-card-link"</span><span class="op">,</span> <span class="nam">attrs</span><span class="op">=</span><span class="op">{</span><span class="str">"data-test"</span><span class="op">:</span> <span class="str">"property-card-link"</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="par run show_par"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">link_element</span> <span class="key">or</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">link_element</span><span class="op">,</span> <span class="nam">NavigableString</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">147&#x202F;&#x219B;&#x202F;148</span><span class="annotate long">line 147 didn't jump to line 148 because the condition on line 147 was never true</span></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">        <span class="key">return</span> <span class="str">""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">link_element</span> <span class="key">or</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">link_element</span><span class="op">,</span> <span class="nam">NavigableString</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">        <span class="key">return</span> <span class="str">""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t149" href="#t149">149</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t150" href="#t150">150</a></span><span class="t">    <span class="nam">href</span> <span class="op">=</span> <span class="nam">link_element</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">"href"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="par run show_par"><span class="n"><a id="t151" href="#t151">151</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">href</span><span class="op">,</span> <span class="nam">str</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">151&#x202F;&#x219B;&#x202F;152</span><span class="annotate long">line 151 didn't jump to line 152 because the condition on line 151 was never true</span></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t152" href="#t152">152</a></span><span class="t">        <span class="key">return</span> <span class="str">""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t151" href="#t151">151</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">href</span><span class="op">,</span> <span class="nam">str</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t152" href="#t152">152</a></span><span class="t">        <span class="key">return</span> <span class="str">""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t153" href="#t153">153</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t154" href="#t154">154</a></span><span class="t">    <span class="key">return</span> <span class="nam">href</span> <span class="key">if</span> <span class="nam">href</span><span class="op">.</span><span class="nam">startswith</span><span class="op">(</span><span class="str">"http"</span><span class="op">)</span> <span class="key">else</span> <span class="fst">f"</span><span class="fst">https://www.zillow.com</span><span class="op">{</span><span class="nam">href</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t155" href="#t155">155</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -500,7 +500,7 @@
             <a class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.1">coverage.py v7.8.1</a>,
-            created at 2025-06-02 20:29 +0000
+            created at 2025-06-02 20:47 +0000
         </p>
     </div>
 </footer>
