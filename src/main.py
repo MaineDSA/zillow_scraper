@@ -87,7 +87,8 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_c
         await page.wait_for_timeout(wait_time)
 
         # Occasionally scroll back up a bit to simulate more natural browsing
-        if iteration % 7 == 0 and iteration > 0:
+        scroll_up_chance: float = 0.15
+        if iteration > 0 and cryptogen.random() < scroll_up_chance:
             back_scroll = cryptogen.randint(100, 300)
             await page.evaluate(f"""
                 const searchContainer = document.querySelector('[class*="search-page-list-container"]');
