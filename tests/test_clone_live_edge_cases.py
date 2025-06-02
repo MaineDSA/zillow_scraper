@@ -1,7 +1,8 @@
 import pytest
 from patchright.async_api import ViewportSize, async_playwright
 
-from src.main import ZillowURLs, _scroll_and_load_listings
+from src.browser_automation import _scroll_and_load_listings
+from src.constants import ZillowURLs
 
 
 @pytest.mark.asyncio

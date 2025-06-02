@@ -1,8 +1,4 @@
-from src.main import (
-    _clean_price_text,
-    _extract_numeric_price,
-    _format_price_range,
-)
+from src.parsers import _clean_price_text, _extract_numeric_price, _format_price_range
 
 
 def test_format_price_range_empty_list() -> None:

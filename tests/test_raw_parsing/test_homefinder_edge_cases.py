@@ -2,7 +2,8 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from bs4 import BeautifulSoup
 
-from src.main import ZillowHomeFinder, ZillowParseError
+from src.exceptions import ZillowParseError
+from src.scraper import ZillowHomeFinder
 
 
 async def test_homefinder_no_property_cards() -> None:

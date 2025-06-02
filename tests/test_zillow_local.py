@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest_asyncio
 from bs4 import BeautifulSoup
 
-from src.main import ZillowHomeFinder
+from src.scraper import ZillowHomeFinder
 
 
 @pytest_asyncio.fixture(scope="module")
