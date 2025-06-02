@@ -1,4 +1,3 @@
-
 import pytest
 from patchright.async_api import ViewportSize, async_playwright
 
