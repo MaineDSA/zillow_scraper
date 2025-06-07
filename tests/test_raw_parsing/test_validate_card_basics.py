@@ -3,7 +3,7 @@ import re
 import pytest
 
 from src.exceptions import ZillowParseError
-from src.parsers import _validate_card_basics
+from src.scraper import _validate_card_basics
 
 
 @pytest.mark.parametrize(

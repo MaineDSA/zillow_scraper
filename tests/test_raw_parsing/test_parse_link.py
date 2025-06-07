@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 
-from src.parsers import _parse_main_link
+from src.scraper import _parse_main_link
 
 
 def test_valid_absolute_url() -> None:
