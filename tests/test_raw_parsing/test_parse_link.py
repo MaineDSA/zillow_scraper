@@ -1,164 +1,203 @@
-from unittest.mock import Mock
+import pytest
+from bs4 import BeautifulSoup, Tag
 
-from bs4 import BeautifulSoup, NavigableString, Tag
+from src.exceptions import ZillowParseError
+from src.scraper import ZillowCardParser
 
-from src.scraper import _parse_main_link
+
+def create_test_card(link_html: str = "", address: str = "123 Test St") -> Tag:
+    """Create a test card with specified link HTML and a valid address."""
+    html = f"""
+        <article data-test="property-card">
+            <address>{address}</address>
+            {link_html}
+        </article>
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    card = soup.find("article")
+    assert isinstance(card, Tag)
+    return card
 
 
 def test_valid_absolute_url() -> None:
     """Test with valid absolute URL."""
-    html = """
-        <div>
-            <a class="property-card-link" data-test="property-card-link" href="https://www.zillow.com/property/123">
-                Property Link
-            </a>
-        </div>
+    link_html = """
+        <a class="property-card-link" data-test="property-card-link" href="https://www.zillow.com/property/123">
+            Property Link
+        </a>
     """
-    soup = BeautifulSoup(html, "html.parser")
-    card = soup.find("div")
-    assert isinstance(card, Tag)
+    card = create_test_card(link_html)
+    parser = ZillowCardParser(card)
 
-    result = _parse_main_link(card)
-    assert result == "https://www.zillow.com/property/123"
+    assert parser.main_link == "https://www.zillow.com/property/123"
 
 
 def test_valid_relative_url() -> None:
     """Test with valid relative URL."""
-    html = """
-        <div>
-            <a class="property-card-link" data-test="property-card-link" href="/property/456">
-                Property Link
-            </a>
-        </div>
+    link_html = """
+        <a class="property-card-link" data-test="property-card-link" href="/property/456">
+            Property Link
+        </a>
     """
-    soup = BeautifulSoup(html, "html.parser")
-    card = soup.find("div")
-    assert isinstance(card, Tag)
+    card = create_test_card(link_html)
+    parser = ZillowCardParser(card)
 
-    result = _parse_main_link(card)
-    assert result == "https://www.zillow.com/property/456"
+    assert parser.main_link == "https://www.zillow.com/property/456"
 
 
 def test_no_link_element_found() -> None:
     """Test when no matching link element is found."""
-    html = """
-        <div>
-            <a class="different-class" href="/property/123">
-                Not the right link
-            </a>
-            <span>Some other content</span>
-        </div>
+    link_html = """
+        <a class="different-class" href="/property/123">
+            Not the right link
+        </a>
+        <span>Some other content</span>
     """
-    soup = BeautifulSoup(html, "html.parser")
-    card = soup.find("div")
-    assert isinstance(card, Tag)
+    card = create_test_card(link_html)
 
-    result = _parse_main_link(card)
-    assert result == ""
+    # This should raise a ZillowParseError due to missing valid link
+    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+        ZillowCardParser(card)
 
 
 def test_link_element_is_none() -> None:
-    """Test when find() returns None."""
-    html = "<div></div>"
-    soup = BeautifulSoup(html, "html.parser")
-    card = soup.find("div")
-    assert isinstance(card, Tag)
+    """Test when find() returns None (no link element)."""
+    # Card with no link element at all
+    card = create_test_card("")
 
-    result = _parse_main_link(card)
-    assert result == ""
-
-
-def test_link_element_is_navigable_string() -> None:
-    """Test when find() returns a NavigableString instead of Tag."""
-    # This is a tricky case to create naturally, so we'll mock it
-    card = Mock()
-    navigable_string = NavigableString("some text")
-    card.find.return_value = navigable_string
-
-    result = _parse_main_link(card)
-    assert result == ""
+    # This should raise a ZillowParseError due to missing link
+    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+        ZillowCardParser(card)
 
 
 def test_wrong_class_name() -> None:
     """Test with link that has wrong class name."""
-    html = """
-        <div>
-            <a class="wrong-class" data-test="property-card-link" href="/property/123">
-                Property Link
-            </a>
-        </div>
+    link_html = """
+        <a class="wrong-class" data-test="property-card-link" href="/property/123">
+            Property Link
+        </a>
     """
-    soup = BeautifulSoup(html, "html.parser")
-    card = soup.find("div")
-    assert isinstance(card, Tag)
+    card = create_test_card(link_html)
 
-    result = _parse_main_link(card)
-    assert result == ""
+    # This should raise a ZillowParseError due to missing valid link
+    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+        ZillowCardParser(card)
 
 
 def test_wrong_data_test_attribute() -> None:
     """Test with link that has wrong data-test attribute."""
-    html = """
-        <div>
-            <a class="property-card-link" data-test="wrong-test" href="/property/123">
-                Property Link
-            </a>
-        </div>
+    link_html = """
+        <a class="property-card-link" data-test="wrong-test" href="/property/123">
+            Property Link
+        </a>
     """
-    soup = BeautifulSoup(html, "html.parser")
-    card = soup.find("div")
-    assert isinstance(card, Tag)
+    card = create_test_card(link_html)
 
-    result = _parse_main_link(card)
-    assert result == ""
+    # This should raise a ZillowParseError due to missing valid link
+    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+        ZillowCardParser(card)
 
 
 def test_missing_data_test_attribute() -> None:
     """Test with link that's missing data-test attribute."""
-    html = """
-        <div>
-            <a class="property-card-link" href="/property/123">
-                Property Link
-            </a>
-        </div>
+    link_html = """
+        <a class="property-card-link" href="/property/123">
+            Property Link
+        </a>
     """
-    soup = BeautifulSoup(html, "html.parser")
-    card = soup.find("div")
-    assert isinstance(card, Tag)
+    card = create_test_card(link_html)
 
-    result = _parse_main_link(card)
-    assert result == ""
+    # This should raise a ZillowParseError due to missing valid link
+    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+        ZillowCardParser(card)
 
 
 def test_href_is_none() -> None:
     """Test when href attribute is None."""
-    html = """
-        <div>
-            <a class="property-card-link" data-test="property-card-link">
-                Property Link (no href)
-            </a>
-        </div>
+    link_html = """
+        <a class="property-card-link" data-test="property-card-link">
+            Property Link (no href)
+        </a>
     """
-    soup = BeautifulSoup(html, "html.parser")
-    card = soup.find("div")
-    assert isinstance(card, Tag)
+    card = create_test_card(link_html)
 
-    result = _parse_main_link(card)
-    assert result == ""
+    # This should raise a ZillowParseError due to missing valid link
+    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+        ZillowCardParser(card)
 
 
 def test_href_is_empty_string() -> None:
     """Test when href attribute is empty string."""
-    html = """
-        <div>
-            <a class="property-card-link" data-test="property-card-link" href="">
-                Property Link
-            </a>
-        </div>
+    link_html = """
+        <a class="property-card-link" data-test="property-card-link" href="">
+            Property Link
+        </a>
     """
-    soup = BeautifulSoup(html, "html.parser")
-    card = soup.find("div")
-    assert isinstance(card, Tag)
+    card = create_test_card(link_html)
 
-    result = _parse_main_link(card)
-    assert result == "https://www.zillow.com"
+    # This should raise a ZillowParseError due to missing valid link (empty href)
+    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+        ZillowCardParser(card)
+
+
+def test_href_is_whitespace_only() -> None:
+    """Test when href attribute contains only whitespace."""
+    link_html = """
+        <a class="property-card-link" data-test="property-card-link" href="   ">
+            Property Link
+        </a>
+    """
+    card = create_test_card(link_html)
+
+    # This should raise a ZillowParseError due to missing valid link (whitespace-only href)
+    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+        ZillowCardParser(card)
+
+
+def test_multiple_valid_links_takes_first() -> None:
+    """Test that when multiple valid links exist, the first one is used."""
+    link_html = """
+        <a class="property-card-link" data-test="property-card-link" href="/property/first">
+            First Link
+        </a>
+        <a class="property-card-link" data-test="property-card-link" href="/property/second">
+            Second Link
+        </a>
+    """
+    card = create_test_card(link_html)
+    parser = ZillowCardParser(card)
+
+    assert parser.main_link == "https://www.zillow.com/property/first"
+
+
+def test_complex_relative_url() -> None:
+    """Test with complex relative URL including query parameters."""
+    link_html = """
+        <a class="property-card-link" data-test="property-card-link" href="/homedetails/123-main-st/456_zpid/?param=value">
+            Property Link
+        </a>
+    """
+    card = create_test_card(link_html)
+    parser = ZillowCardParser(card)
+
+    assert parser.main_link == "https://www.zillow.com/homedetails/123-main-st/456_zpid/?param=value"
+
+
+def test_non_string_href_attribute() -> None:
+    """Test when href attribute is not a string (edge case)."""
+    # Create a card and manually modify the href to be a list (unusual but possible)
+    link_html = """
+        <a class="property-card-link" data-test="property-card-link" href="/property/123">
+            Property Link
+        </a>
+    """
+    card = create_test_card(link_html)
+
+    # Manually modify the href attribute to be non-string
+    link_element = card.find("a", class_="property-card-link")
+    assert isinstance(link_element, Tag)
+    link_element.attrs["href"] = ["not", "a", "string"]  # List instead of string
+
+    # This should raise a ZillowParseError due to invalid href type
+    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+        ZillowCardParser(card)

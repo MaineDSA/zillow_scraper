@@ -1,6 +1,8 @@
 import logging
 import re
+from dataclasses import dataclass
 from random import SystemRandom
+from typing import ClassVar
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 from patchright.async_api import Page
@@ -14,241 +16,240 @@ logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
 
 
-def _parse_address(card: Tag) -> str:
-    """Extract address from a property card."""
-    address_element = card.find("address")
-    if address_element:
-        return address_element.get_text(strip=True).replace("|", "")
-    return ""
+@dataclass
+class PropertyListing:
+    """Represents a single property listing."""
+
+    address: str
+    price: str
+    link: str
 
 
-def _parse_main_link(card: Tag) -> str:
-    """Extract main property link from a property card."""
-    link_element = card.find("a", class_="property-card-link", attrs={"data-test": "property-card-link"})
-    if not link_element or isinstance(link_element, NavigableString):
-        return ""
+class ZillowCardParser:
+    """Handles parsing of individual property cards."""
 
-    href = link_element.get("href")
-    if not isinstance(href, str):
-        return ""
+    PRICE_CLEANUP_PATTERNS: ClassVar[list[tuple[str, str, re.RegexFlag]]] = [
+        (r"\+?\s*\d+\s*bds?(?:\s|$)", "", re.IGNORECASE),
+        (r"\+?\s*bd(?:\s|$)", "", re.IGNORECASE),
+        (r"\s+", " ", re.NOFLAG),
+    ]
 
-    return href if href.startswith("http") else f"https://www.zillow.com{href}"
+    PRICE_REPLACEMENTS: ClassVar[list[str]] = ["utilities", "/mo", "+"]
 
+    def __init__(self, card: Tag) -> None:
+        self.card = card
+        self.address = self._parse_address()
+        self.main_link = self._parse_main_link()
+        self._validate_basics()
 
-def _clean_price_text(price_text: str) -> str:
-    """Clean and standardize price text."""
-    cleaned = re.sub(r"\+?\s*\d+\s*bds?(?:\s|$)", "", price_text, flags=re.IGNORECASE)
-    cleaned = re.sub(r"\+?\s*bd(?:\s|$)", "", cleaned, flags=re.IGNORECASE)
-    cleaned = cleaned.replace("utilities", "")
-    cleaned = cleaned.replace("/mo", "")
-    cleaned = cleaned.replace("+", "")
-    cleaned = re.sub(r"\s+", " ", cleaned)
-    return cleaned.strip()
+    def _parse_address(self) -> str:
+        """Extract address from property card."""
+        address_element = self.card.find("address")
+        return address_element.get_text(strip=True).replace("|", "") if address_element else ""
 
+    def _parse_main_link(self) -> str:
+        """Extract main property link from property card."""
+        link_element = self.card.find("a", class_="property-card-link", attrs={"data-test": "property-card-link"})
 
-def _extract_numeric_price(price_text: str) -> int:
-    """Extract numeric value from price text for comparison."""
-    numeric_only = re.sub(r"[^\d,.]", "", price_text).replace(",", "")
-    try:
-        return int(float(numeric_only))
-    except (ValueError, TypeError):
-        return 0
+        if not link_element or isinstance(link_element, NavigableString):
+            return ""
 
+        href = link_element.get("href", "")
+        if not href or not isinstance(href, str) or not href.strip():
+            return ""
 
-def _format_price_range(prices: list[str]) -> str:
-    """Format a list of prices into a range or single price."""
-    if not prices:
-        return ""
+        href = href.strip()
+        return href if href.startswith("http") else f"https://www.zillow.com{href}"
 
-    if len(prices) == 1:
-        return prices[0]
-
-    price_values = [(price, _extract_numeric_price(price)) for price in prices]
-    valid_prices = [(price, value) for price, value in price_values if value > 0]
-    if not valid_prices:
-        return prices[0]
-    valid_prices.sort(key=lambda x: x[1])
-
-    min_price = valid_prices[0][0]
-    max_price = valid_prices[-1][0]
-    if valid_prices[0][1] == valid_prices[-1][1]:
-        return min_price
-
-    return f"{min_price} - {max_price}"
-
-
-def _validate_card_basics(address: str, main_link: str) -> None:
-    """Validate that card has required basic information."""
-    if not address or not address.strip() or not main_link or not main_link.strip():
+    def _validate_basics(self) -> None:
+        """Validate that card has required information."""
         missing = []
-        if not address or not address.strip():
+        if not self.address.strip():
             missing.append("Address")
-        if not main_link or not main_link.strip():
+        if not self.main_link.strip():
             missing.append("Link")
-        err = f"Missing {', '.join(missing)} in card."
-        raise ZillowParseError(err)
 
+        if missing:
+            error_msg = f"Missing {', '.join(missing)} in card."
+            raise ZillowParseError(error_msg)
 
-def _extract_available_units_count(card: Tag) -> int:
-    """Extract the number of available units from property card badges."""
-    badge_area = card.find("div", class_=re.compile(r"StyledPropertyCardBadgeArea"))
-    if not badge_area or isinstance(badge_area, NavigableString):
+    def _clean_price_text(self, price_text: str) -> str:
+        """Clean and standardize price text."""
+        cleaned = price_text
+
+        # Apply regex patterns
+        for pattern, replacement, flags in self.PRICE_CLEANUP_PATTERNS:
+            cleaned = re.sub(pattern, replacement, cleaned, flags=flags)
+
+        # Apply string replacements
+        for replacement in self.PRICE_REPLACEMENTS:
+            cleaned = cleaned.replace(replacement, "")
+
+        return cleaned.strip()
+
+    def _extract_numeric_price(self, price_text: str) -> int:
+        """Extract numeric value from price text."""
+        numeric_only = re.sub(r"[^\d,.]", "", price_text).replace(",", "")
+        try:
+            return int(float(numeric_only))
+        except (ValueError, TypeError):
+            return 0
+
+    def _format_price_range(self, prices: list[str]) -> str:
+        """Format prices into a range or single price."""
+        if not prices:
+            return ""
+        if len(prices) == 1:
+            return prices[0]
+
+        # Filter and sort valid prices
+        valid_prices = [(price, self._extract_numeric_price(price)) for price in prices]
+        valid_prices = [(price, value) for price, value in valid_prices if value > 0]
+
+        if not valid_prices:
+            return prices[0]
+
+        valid_prices.sort(key=lambda x: x[1])
+        min_price, max_price = valid_prices[0][0], valid_prices[-1][0]
+
+        return min_price if valid_prices[0][1] == valid_prices[-1][1] else f"{min_price} - {max_price}"
+
+    def _get_units_count(self) -> int:
+        """Extract number of available units."""
+        badge_area = self.card.find("div", class_=re.compile(r"StyledPropertyCardBadgeArea"))
+        if not badge_area or isinstance(badge_area, NavigableString):
+            return 1
+
+        badges = badge_area.find_all("span", class_=re.compile(r"StyledPropertyCardBadge"))
+        for badge in badges:
+            badge_text = badge.get_text(strip=True).lower()
+            unit_match = re.search(r"(\d+)\s+(?:available\s+)?units?", badge_text)
+            if unit_match:
+                try:
+                    return int(unit_match.group(1))
+                except ValueError:
+                    continue
         return 1
 
-    badges = badge_area.find_all("span", class_=re.compile(r"StyledPropertyCardBadge"))
-    for badge in badges:
-        badge_text = badge.get_text(strip=True).lower()
-        unit_match = re.search(r"(\d+)\s+(?:available\s+)?units?", badge_text)
-        if unit_match:
-            try:
-                return int(unit_match.group(1))
-            except ValueError:
-                continue
+    def _create_specific_link(self, bed_info: str) -> str:
+        """Create link with bedroom anchor if applicable."""
+        if not bed_info or "bd" not in bed_info.lower():
+            return self.main_link
 
-    return 1
+        bed_num = re.search(r"\d+", bed_info)
+        return f"{self.main_link}#bedrooms-{bed_num.group()}" if bed_num else self.main_link
 
+    def _get_main_price_listings(self) -> list[PropertyListing]:
+        """Extract main price from property card."""
+        main_price_element = self.card.find("span", attrs={"data-test": "property-card-price"})
+        if not main_price_element:
+            return []
 
-def _extract_main_price(card: Tag, address: str, main_link: str) -> list[tuple[str, str, str]]:
-    """Extract the main price from the property card."""
-    main_price_element = card.find("span", attrs={"data-test": "property-card-price"})
-    if not main_price_element:
-        return []
-
-    price_text = _clean_price_text(main_price_element.get_text(strip=True))
-    if not price_text:
-        return []
-
-    units_count = _extract_available_units_count(card)
-
-    unit_suffix = f" ({units_count} units available)" if units_count > 1 else ""
-    final_address = f"{address}{unit_suffix}"
-
-    return [(final_address, price_text, main_link)]
-
-
-def _create_specific_link(main_link: str, bed_info: str) -> str:
-    """Create a specific link with bedroom anchor if bed info is available."""
-    if not bed_info or "bd" not in bed_info.lower():
-        return main_link
-
-    bed_num = re.search(r"\d+", bed_info)
-    if not bed_num:
-        return main_link
-
-    return f"{main_link}#bedrooms-{bed_num.group()}"
-
-
-def _parse_inventory_data(inventory_section: Tag) -> list[tuple[str, str]]:
-    """Extract price and bedroom data from inventory section."""
-    inventory_prices = inventory_section.find_all("span", class_=re.compile(r"PriceText"))
-    inventory_beds = inventory_section.find_all("span", class_=re.compile(r"BedText"))
-
-    results = []
-    for i, price_elem in enumerate(inventory_prices):
-        price_text = _clean_price_text(price_elem.get_text(strip=True))
+        price_text = self._clean_price_text(main_price_element.get_text(strip=True))
         if not price_text:
-            continue
+            return []
 
-        bed_info = ""
-        if i < len(inventory_beds):
-            bed_info = inventory_beds[i].get_text(strip=True)
+        units_count = self._get_units_count()
+        address = self.address + (f" ({units_count} units available)" if units_count > 1 else "")
 
-        results.append((price_text, bed_info))
+        return [PropertyListing(address, price_text, self.main_link)]
 
-    return results
+    def _get_inventory_listings(self) -> list[PropertyListing]:
+        """Extract multiple prices from inventory section."""
+        inventory_section = self.card.find("div", class_=re.compile(r"property-card-inventory-set"))
+        if not inventory_section or isinstance(inventory_section, NavigableString):
+            return []
 
+        # Extract price and bedroom data
+        price_elements = inventory_section.find_all("span", class_=re.compile(r"PriceText"))
+        bed_elements = inventory_section.find_all("span", class_=re.compile(r"BedText"))
 
-def _create_inventory_entry(address: str, main_link: str, price: str, bed_info: str, units_count: int) -> tuple[str, str, str]:
-    """Create a single inventory entry with proper formatting."""
-    bed_address = f"{address} ({bed_info})" if bed_info else address
+        price_bed_pairs = []
+        for i, price_elem in enumerate(price_elements):
+            price_text = self._clean_price_text(price_elem.get_text(strip=True))
+            if price_text:
+                bed_info = bed_elements[i].get_text(strip=True) if i < len(bed_elements) else ""
+                price_bed_pairs.append((price_text, bed_info))
 
-    if units_count > 1:
-        bed_address = f"{bed_address} ({units_count} units available)"
+        if not price_bed_pairs:
+            return []
 
-    specific_link = _create_specific_link(main_link, bed_info)
+        units_count = self._get_units_count()
 
-    return bed_address, price, specific_link
+        # Handle multiple units with price range
+        if units_count > 1 and len(price_bed_pairs) > 1:
+            prices = [price for price, _ in price_bed_pairs]
+            price_range = self._format_price_range(prices)
+            address = f"{self.address} ({units_count} units available)"
+            return [PropertyListing(address, price_range, self.main_link)]
 
+        # Create individual listings
+        listings = []
+        for price, bed_info in price_bed_pairs:
+            address = self.address + (f" ({bed_info})" if bed_info else "")
+            if units_count > 1:
+                address += f" ({units_count} units available)"
 
-def _extract_inventory_prices(card: Tag, address: str, main_link: str) -> list[tuple[str, str, str]]:
-    """Extract multiple prices from the inventory section."""
-    inventory_section = card.find("div", class_=re.compile(r"property-card-inventory-set"))
-    if not inventory_section or isinstance(inventory_section, NavigableString):
-        return []
+            specific_link = self._create_specific_link(bed_info)
+            listings.append(PropertyListing(address, price, specific_link))
 
-    # Parse all price/bedroom combinations
-    inventory_data = _parse_inventory_data(inventory_section)
-    if not inventory_data:
-        return []
+        return listings
 
-    units_count = _extract_available_units_count(card)
+    def parse(self) -> list[PropertyListing]:
+        """Parse the card and return all property listings."""
+        inventory_listings = self._get_inventory_listings()
+        if inventory_listings:
+            return inventory_listings
 
-    if units_count > 1 and len(inventory_data) > 1:
-        prices = [price for price, _ in inventory_data]
-        price_range = _format_price_range(prices)
-        final_address = f"{address} ({units_count} units available)"
+        main_listings = self._get_main_price_listings()
+        if not main_listings:
+            error_msg = "No valid prices found in card."
+            raise ZillowParseError(error_msg)
 
-        return [(final_address, price_range, main_link)]
-
-    results = []
-    for price, bed_info in inventory_data:
-        entry = _create_inventory_entry(address, main_link, price, bed_info, units_count)
-        results.append(entry)
-
-    return results
-
-
-def _parse_zillow_card(card: Tag) -> list[tuple[str, str, str]]:
-    """Parse a single property card and extract all price variations."""
-    address = _parse_address(card)
-    main_link = _parse_main_link(card)
-
-    _validate_card_basics(address, main_link)
-
-    main_prices = _extract_main_price(card, address, main_link)
-    inventory_prices = _extract_inventory_prices(card, address, main_link)
-
-    results = inventory_prices if inventory_prices else main_prices
-
-    if not results:
-        msg = "No valid prices found in card."
-        raise ZillowParseError(msg)
-
-    return results
+        return main_listings
 
 
 class ZillowHomeFinder:
     """Scrape property data from a Zillow soup object."""
 
     def __init__(self, soup: BeautifulSoup) -> None:
-        self.cards: list[Tag] = []
-        self.addresses: list[str] = []
-        self.prices: list[str] = []
-        self.links: list[str] = []
+        self.listings: list[PropertyListing] = []
+        self._parse_soup(soup)
 
-        self.cards = soup.find_all("article", attrs={"data-test": "property-card"})
-        if not self.cards:
-            err = "No property cards found."
-            raise ZillowParseError(err)
+    def _parse_soup(self, soup: BeautifulSoup) -> None:
+        """Parse all property cards from soup."""
+        cards = soup.find_all("article", attrs={"data-test": "property-card"})
+        if not cards:
+            error_msg = "No property cards found."
+            raise ZillowParseError(error_msg)
 
-        msg = f"Found {len(self.cards)} property cards to parse"
-        logger.info(msg)
+        logger.info("Found %d property cards to parse", len(cards))
 
-        for i, card in enumerate(self.cards):
+        for i, card in enumerate(cards):
             try:
-                card_results = _parse_zillow_card(card)
-                msg = f"Card {i + 1}: Found {len(card_results)} entries"
-                logger.info(msg)
-
-                for address, price, link in card_results:
-                    self.addresses.append(address)
-                    self.prices.append(price)
-                    self.links.append(link)
-
+                parser = ZillowCardParser(card)
+                card_listings = parser.parse()
+                logger.info("Card %d: Found %d entries", i + 1, len(card_listings))
+                self.listings.extend(card_listings)
             except ZillowParseError as e:
-                err = f"Skipping card {i + 1} due to parse error: {e}"
-                logger.error(err)
+                logger.error("Skipping card %d due to parse error: %s", i + 1, str(e))
+
+    @property
+    def addresses(self) -> list[str]:
+        """Get all addresses."""
+        return [listing.address for listing in self.listings]
+
+    @property
+    def prices(self) -> list[str]:
+        """Get all prices."""
+        return [listing.price for listing in self.listings]
+
+    @property
+    def links(self) -> list[str]:
+        """Get all links."""
+        return [listing.link for listing in self.listings]
 
     async def upload_data(self, page: Page, url: str = GoogleFormConstants.FORM_URL) -> None:
-        for address, price, link in tqdm(zip(self.addresses, self.prices, self.links, strict=False), total=len(self.prices), unit="entry"):
-            await _submit_form(page, url, address, price, link)
+        """Upload all listings to the form."""
+        for listing in tqdm(self.listings, unit="entry"):
+            await _submit_form(page, url, listing.address, listing.price, listing.link)
