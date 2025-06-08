@@ -2,6 +2,7 @@ import asyncio
 import logging
 from random import SystemRandom
 
+import dotenv
 from bs4 import BeautifulSoup
 from patchright.async_api import ViewportSize, async_playwright
 
@@ -14,8 +15,14 @@ logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
 
 
-async def main(url: str = ZillowURLs.ZILLOW_URL) -> None:
+async def main() -> None:
     """Launch browser, scrape Zillow listings, and submit to Google Form."""
+    dotenv_values = dotenv.dotenv_values("../.env")
+    url = dotenv_values.get("ZILLOW_URL", ZillowURLs.CLONE_URL)
+    if not url:
+        err = "Missing URL for scraping"
+        raise ValueError(err)
+
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=False)
         context = await browser.new_context(
@@ -25,14 +32,16 @@ async def main(url: str = ZillowURLs.ZILLOW_URL) -> None:
         page = await context.new_page()
 
         await page.goto(url)
-
         await _scroll_and_load_listings(page)
+
+        form_url = dotenv_values.get("FORM_URL", None)
+        if not form_url:
+            err = "Missing URL for Google Form"
+            raise ValueError(err)
 
         html = await page.content()
         soup = BeautifulSoup(html, "html.parser")
-
-        home_finder = ZillowHomeFinder(soup)
-        await home_finder.upload_data(page)
+        await ZillowHomeFinder(soup).upload_data(page, url=form_url)
 
         await browser.close()
 

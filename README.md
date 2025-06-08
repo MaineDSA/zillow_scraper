@@ -31,8 +31,12 @@ The responses are stored in a connected Google Spreadsheet for easy tracking.
     patchright install
     ```
 
-1. In `src/main.py`, update `GoogleFormConstants.FORM_URL` to match your Google Form
-1. Ensure that `GoogleFormConstants.ADDRESS_INPUT_XPATH`, `GoogleFormConstants.PRICE_INPUT_XPATH`, `GoogleFormConstants.LINK_INPUT_XPATH`, and `GoogleFormConstants.SUBMIT_BUTTON_XPATH` match your Google Form.
+1. Create a file called `.env` in the project directory with the following contents:
+
+    ```bash
+    FORM_URL=<YOUR GOOGLE FORMS URL>
+    ZILLOW_URL=<URL OF THE ZILLOW CLONE TO SCRAPE>
+    ```
 1. Run the script:
 
     ```shell

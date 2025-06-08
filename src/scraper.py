@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from patchright.async_api import Page
 from tqdm import tqdm
 
-from src.constants import GoogleFormConstants
 from src.exceptions import ZillowParseError
 from src.form_submission import _submit_form
 
@@ -249,7 +248,7 @@ class ZillowHomeFinder:
         """Get all links."""
         return [listing.link for listing in self.listings]
 
-    async def upload_data(self, page: Page, url: str = GoogleFormConstants.FORM_URL) -> None:
+    async def upload_data(self, page: Page, url: str) -> None:
         """Upload all listings to the form."""
         for listing in tqdm(self.listings, unit="entry"):
             await _submit_form(page, url, listing.address, listing.price, listing.link)

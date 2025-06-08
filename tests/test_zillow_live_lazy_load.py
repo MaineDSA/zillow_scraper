@@ -26,7 +26,6 @@ async def homefinder_zillow_live() -> AsyncGenerator[ZillowHomeFinder]:
 
         html = await page.content()
         soup = BeautifulSoup(html, "html.parser")
-
         yield ZillowHomeFinder(soup)
 
         await browser.close()
