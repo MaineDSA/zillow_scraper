@@ -17,7 +17,7 @@ cryptogen = SystemRandom()
 
 async def main() -> None:
     """Launch browser, scrape Zillow listings, and submit to Google Form."""
-    dotenv_values = dotenv.dotenv_values("../.env")
+    dotenv_values = dotenv.dotenv_values(".env")
     url = dotenv_values.get("ZILLOW_URL", ZillowURLs.CLONE_URL)
     if not url:
         err = "Missing URL for scraping"
