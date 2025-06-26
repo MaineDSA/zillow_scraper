@@ -228,7 +228,7 @@ class ZillowHomeFinder:
             try:
                 parser = ZillowCardParser(card)
                 card_listings = parser.parse()
-                logger.info("Card %d: Found %d entries", i + 1, len(card_listings))
+                logger.debug("Card %d: Found %d entries", i + 1, len(card_listings))
                 self.listings.extend(card_listings)
             except ZillowParseError as e:
                 logger.error("Skipping card %d due to parse error: %s", i + 1, str(e))

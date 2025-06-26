@@ -20,7 +20,7 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_c
         current_count = len(current_cards)
 
         msg = f"Iteration {iteration + 1}: Found {current_count} property cards"
-        logger.info(msg)
+        logger.debug(msg)
 
         if current_count >= max_entries:
             msg = f"Reached target of {max_entries} entries"
@@ -43,7 +43,7 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_c
 
             if is_visible:
                 msg = "Reached bottom of page (search-list-save-search-parent element is visible)"
-                logger.info(msg)
+                logger.debug(msg)
                 break
 
         if current_count == previous_count:
@@ -79,9 +79,9 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_c
             back_scroll = cryptogen.randint(100, 300)
             try:
                 await page.evaluate(f"""
-const searchContainer = document.querySelector('[class*="search-page-list-container"]');
-                                    searchContainer.scrollTop += {back_scroll};
-                                    """)
+                    const searchContainer = document.querySelector('[class*="search-page-list-container"]');
+                    searchContainer.scrollTop += {back_scroll};
+                """)
             except PlaywrightError as e:
                 wrn = f"Scroll attempt failed: {e}, trying window scroll"
                 logger.warning(wrn)
@@ -92,15 +92,15 @@ const searchContainer = document.querySelector('[class*="search-page-list-contai
     final_cards = await page.query_selector_all('article[data-test="property-card"]')
     final_count = len(final_cards)
     msg = f"Lazy loading complete. Total property cards loaded: {final_count}"
-    logger.info(msg)
+    logger.debug(msg)
 
     # Scroll back to top to ensure all content is properly rendered
     await page.evaluate("""
-const searchContainer = document.querySelector('[class*="search-page-list-container"]');
-if (searchContainer) {
-searchContainer.scrollTop = 0;
-} else {
-window.scrollTo(0, 0);
-}
+        const searchContainer = document.querySelector('[class*="search-page-list-container"]');
+        if (searchContainer) {
+        searchContainer.scrollTop = 0;
+        } else {
+        window.scrollTo(0, 0);
+        }
     """)
     await page.wait_for_timeout(1500)
