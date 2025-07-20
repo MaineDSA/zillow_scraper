@@ -248,7 +248,7 @@ class ZillowHomeFinder:
         """Get all links."""
         return [listing.link for listing in self.listings]
 
-    async def upload_data(self, page: Page, url: str) -> None:
+    async def upload_data(self, page: Page, url: str | None) -> None:
         """Upload all listings to a Google Form."""
         if not url:
             err = "Missing URL for Google Form"
