@@ -249,6 +249,10 @@ class ZillowHomeFinder:
         return [listing.link for listing in self.listings]
 
     async def upload_data(self, page: Page, url: str) -> None:
-        """Upload all listings to the form."""
+        """Upload all listings to a Google Form."""
+        if not url:
+            err = "Missing URL for Google Form"
+            raise ValueError(err)
+
         for listing in tqdm(self.listings, unit="entry"):
             await _submit_form(page, url, listing.address, listing.price, listing.link)
