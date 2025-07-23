@@ -35,7 +35,7 @@ The responses are stored in a connected Google Spreadsheet for easy tracking.
 
     ```bash
     FORM_URL=<YOUR GOOGLE FORMS URL>
-    ZILLOW_URL=<URL OF THE ZILLOW CLONE TO SCRAPE>
+    SEARCH_URL=<URL OF THE ZILLOW CLONE TO SCRAPE>
     ```
 1. Run the script:
 
