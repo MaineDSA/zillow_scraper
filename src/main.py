@@ -25,22 +25,26 @@ async def check_and_click_next_page(page: Page) -> bool:
         selector = "a[title='Next page']"
         next_button = page.locator(selector).first
 
-        if await next_button.count() > 0:
-            # Check if button is enabled (not disabled)
-            is_disabled = await next_button.is_disabled()
-            is_visible = await next_button.is_visible()
-
-            if not is_disabled and is_visible:
-                logger.debug("Found enabled next page button with selector: %s", selector)
-                await next_button.click()
-                await page.wait_for_load_state()
-                return True
-
-            logger.debug("Next page button found but disabled or not visible: %s", selector)
+        if not next_button:
+            logger.warning("No next page button found")
             return False
 
-        logger.warning("No next page button found")
-        return False
+        # Check if button is enabled (not disabled)
+        is_disabled = await next_button.is_disabled()
+        is_visible = await next_button.is_visible()
+
+        if is_disabled:
+            logger.debug("Next page button found but disabled: %s", selector)
+            return False
+
+        if not is_visible:
+            logger.debug("Next page button found but not visible: %s", selector)
+            return False
+
+        logger.debug("Found enabled next page button with selector: %s", selector)
+        await next_button.click()
+        await page.wait_for_load_state()
+        return True
 
     except TimeoutError as e:
         logger.warning("Error checking for next page button: %s", e)
