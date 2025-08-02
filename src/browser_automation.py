@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
 
 
-async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_change: int = 3, max_scroll_attempts: int = 50) -> None:
+async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_change: int = 3, max_scroll_attempts: int = 50) -> None:
     """Scroll through search results to trigger lazy loading."""
     await page.wait_for_selector('[class*="search-page-list-container"]', timeout=10000)
 
@@ -104,3 +104,39 @@ async def _scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_c
         }
     """)
     await page.wait_for_timeout(1500)
+
+
+async def check_and_click_next_page(page: Page) -> bool:
+    """
+    Check if next page button exists and is enabled, then click it.
+
+    Returns True if next page button was clicked, False otherwise.
+    """
+    try:
+        selector = "a[title='Next page']"
+        next_button = page.locator(selector).first
+
+        if not next_button:
+            logger.warning("No next page button found")
+            return False
+
+        # Check if button is enabled (not disabled)
+        is_disabled = await next_button.is_disabled()
+        is_visible = await next_button.is_visible()
+
+        if is_disabled:
+            logger.debug("Next page button found but disabled: %s", selector)
+            return False
+
+        if not is_visible:
+            logger.debug("Next page button found but not visible: %s", selector)
+            return False
+
+        logger.debug("Found enabled next page button with selector: %s", selector)
+        await next_button.click()
+        await page.wait_for_load_state()
+        return True
+
+    except TimeoutError as e:
+        logger.warning("Error checking for next page button: %s", e)
+        return False

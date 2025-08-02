@@ -4,51 +4,15 @@ from random import SystemRandom
 
 import dotenv
 from bs4 import BeautifulSoup
-from patchright.async_api import Page, ViewportSize, async_playwright
+from patchright.async_api import ViewportSize, async_playwright
 
-from src.browser_automation import _scroll_and_load_listings
+from src.browser_automation import check_and_click_next_page, scroll_and_load_listings
 from src.constants import ZillowURLs
 from src.scraper import ZillowHomeFinder
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
-
-
-async def check_and_click_next_page(page: Page) -> bool:
-    """
-    Check if next page button exists and is enabled, then click it.
-
-    Returns True if next page button was clicked, False otherwise.
-    """
-    try:
-        selector = "a[title='Next page']"
-        next_button = page.locator(selector).first
-
-        if not next_button:
-            logger.warning("No next page button found")
-            return False
-
-        # Check if button is enabled (not disabled)
-        is_disabled = await next_button.is_disabled()
-        is_visible = await next_button.is_visible()
-
-        if is_disabled:
-            logger.debug("Next page button found but disabled: %s", selector)
-            return False
-
-        if not is_visible:
-            logger.debug("Next page button found but not visible: %s", selector)
-            return False
-
-        logger.debug("Found enabled next page button with selector: %s", selector)
-        await next_button.click()
-        await page.wait_for_load_state()
-        return True
-
-    except TimeoutError as e:
-        logger.warning("Error checking for next page button: %s", e)
-        return False
 
 
 async def main() -> None:
@@ -76,7 +40,7 @@ async def main() -> None:
         while True:
             logger.debug("Processing page %s", page_number)
 
-            await _scroll_and_load_listings(page)
+            await scroll_and_load_listings(page)
 
             html = await page.content()
             soup = BeautifulSoup(html, "html.parser")

@@ -3,7 +3,7 @@ from _pytest.logging import LogCaptureFixture
 from patchright.async_api import TimeoutError as PlaywrightTimeoutError
 from patchright.async_api import ViewportSize, async_playwright
 
-from src.browser_automation import _scroll_and_load_listings
+from src.browser_automation import scroll_and_load_listings
 
 
 @pytest.mark.asyncio
@@ -49,7 +49,7 @@ async def test_scroll_exceptions(caplog: LogCaptureFixture) -> None:
 
         try:
             # This should handle exceptions gracefully
-            await _scroll_and_load_listings(page, max_entries=5, max_scroll_attempts=8)
+            await scroll_and_load_listings(page, max_entries=5, max_scroll_attempts=8)
         except PlaywrightTimeoutError:
             # This might happen if the container is removed before wait_for_selector completes
             pytest.skip("Container was removed too quickly, causing timeout - this is expected behavior")
@@ -92,7 +92,7 @@ async def test_scroll_with_context_invalidation() -> None:
         await page.set_content(test_html)
 
         try:
-            await _scroll_and_load_listings(page, max_entries=5, max_scroll_attempts=10)
+            await scroll_and_load_listings(page, max_entries=5, max_scroll_attempts=10)
         except Exception as e:
             # Context invalidation might cause various errors
             if "JSHandles can be evaluated only in the context they were created" in str(e):
@@ -130,6 +130,6 @@ async def test_scroll_timeout_handling() -> None:
 
         # This should raise a TimeoutError because the container doesn't exist
         with pytest.raises(PlaywrightTimeoutError, match="Timeout.*exceeded"):
-            await _scroll_and_load_listings(page, max_entries=5, max_scroll_attempts=2)
+            await scroll_and_load_listings(page, max_entries=5, max_scroll_attempts=2)
 
         await browser.close()

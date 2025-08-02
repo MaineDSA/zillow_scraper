@@ -1,7 +1,7 @@
 import pytest
 from patchright.async_api import ViewportSize, async_playwright
 
-from src.browser_automation import _scroll_and_load_listings
+from src.browser_automation import scroll_and_load_listings
 from src.constants import ZillowURLs
 
 
@@ -15,7 +15,7 @@ async def test_homefinder_clone_max_scrolls() -> None:
         )
         page = await context.new_page()
         await page.goto(ZillowURLs.CLONE_URL)
-        await _scroll_and_load_listings(page, max_scroll_attempts=3)
+        await scroll_and_load_listings(page, max_scroll_attempts=3)
         await browser.close()
 
 
@@ -29,5 +29,5 @@ async def test_homefinder_clone_max_entries() -> None:
         )
         page = await context.new_page()
         await page.goto(ZillowURLs.CLONE_URL)
-        await _scroll_and_load_listings(page, max_entries=11)
+        await scroll_and_load_listings(page, max_entries=11)
         await browser.close()
