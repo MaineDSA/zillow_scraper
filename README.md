@@ -5,13 +5,13 @@
 | Name                       |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
 |--------------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
 | src/\_\_init\_\_.py        |        0 |        0 |        0 |        0 |    100% |           |
-| src/browser\_automation.py |       50 |        0 |       12 |        0 |    100% |           |
+| src/browser\_automation.py |       67 |       16 |       12 |        0 |     80% |   115-142 |
 | src/constants.py           |        9 |        0 |        0 |        0 |    100% |           |
 | src/exceptions.py          |        1 |        0 |        0 |        0 |    100% |           |
 | src/form\_submission.py    |       19 |        0 |        0 |        0 |    100% |           |
-| src/main.py                |       55 |       55 |        4 |        0 |      0% |     1-102 |
+| src/main.py                |       38 |       38 |        4 |        0 |      0% |      1-66 |
 | src/scraper.py             |      166 |       13 |       56 |        6 |     90% |129-130, 136, 145, 149, 169->167, 174, 205-206, 253-258 |
-|                  **TOTAL** |  **300** |   **68** |   **72** |    **6** | **78%** |           |
+|                  **TOTAL** |  **300** |   **67** |   **72** |    **6** | **78%** |           |
 
 
 ## Setup coverage badge
