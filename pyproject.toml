@@ -24,7 +24,7 @@ github = "https://github.com/MaineDSA/zillow_scraper"
 [project.optional-dependencies]
 dev = [
     "bandit[sarif]==1.8.6",
-    "coverage==7.10.1",
+    "coverage==7.10.6",
     "mypy==1.17.1",
     "pre-commit==4.3.0",
     "pytest-asyncio==1.1.0",
