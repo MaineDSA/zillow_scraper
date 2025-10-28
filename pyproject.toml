@@ -38,7 +38,6 @@ dev = [
 
 [tool.ruff]
 line-length = 160
-target-version = "py311"
 include = [
     "src/**/*.py",
     "tests/**/*.py",
