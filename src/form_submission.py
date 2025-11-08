@@ -26,4 +26,4 @@ async def _submit_form(page: Page, url: str, address: str, price: str, link: str
         msg = "Form submission confirmation not received"
         raise PlaywrightTimeoutError(msg) from e
 
-    await page.wait_for_timeout(cryptogen.randint(1000, 3000))
+    await page.wait_for_timeout(cryptogen.randint(1000, 1500))
