@@ -35,6 +35,18 @@ async def main() -> None:
 
         await page.goto(url)
 
+        sort_button = page.locator("button[id='sort-popover']").first
+        if not sort_button:
+            logger.error("No sort page button found")
+        else:
+            await sort_button.click()
+            await page.wait_for_load_state()
+            newest_button = page.get_by_text("Newest")
+            if not newest_button:
+                logger.error("No sort page by newest button found")
+            await newest_button.click()
+            await page.wait_for_load_state()
+
         page_number = 1
 
         while True:
