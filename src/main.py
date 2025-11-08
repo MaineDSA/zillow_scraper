@@ -15,12 +15,8 @@ logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
 
 
-async def main() -> None:
+async def main(form_url: str, url: str) -> None:
     """Launch browser, scrape Zillow listings, and submit to Google Form."""
-    dotenv_values = dotenv.dotenv_values(".env")
-    form_url = dotenv_values.get("FORM_URL", None)
-    url = dotenv_values.get("SEARCH_URL", ZillowURLs.CLONE_URL)
-
     if not url:
         err = "Missing URL for scraping"
         raise ValueError(err)
@@ -75,4 +71,8 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    dotenv_values = dotenv.dotenv_values(".env")
+    dotenv_form_url = dotenv_values.get("FORM_URL", None)
+    dotenv_url = dotenv_values.get("SEARCH_URL", ZillowURLs.CLONE_URL)
+
+    asyncio.run(main(dotenv_form_url, dotenv_url))
