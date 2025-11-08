@@ -129,7 +129,7 @@ async def test_scroll_timeout_handling() -> None:
         await page.set_content(test_html)
 
         # This should raise a TimeoutError because the container doesn't exist
-        with pytest.raises(PlaywrightTimeoutError, match="Timeout.*exceeded"):
+        with pytest.raises(PlaywrightTimeoutError, match=r"Timeout.*exceeded"):
             await scroll_and_load_listings(page, max_entries=5, max_scroll_attempts=2)
 
         await browser.close()

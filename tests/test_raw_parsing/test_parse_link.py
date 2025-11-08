@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from bs4 import BeautifulSoup, Tag
 
@@ -56,7 +58,7 @@ def test_no_link_element_found() -> None:
     card = create_test_card(link_html)
 
     # This should raise a ZillowParseError due to missing valid link
-    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+    with pytest.raises(ZillowParseError, match=re.escape("Missing Link in card.")):
         ZillowCardParser(card)
 
 
@@ -66,7 +68,7 @@ def test_link_element_is_none() -> None:
     card = create_test_card("")
 
     # This should raise a ZillowParseError due to missing link
-    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+    with pytest.raises(ZillowParseError, match=re.escape("Missing Link in card.")):
         ZillowCardParser(card)
 
 
@@ -80,7 +82,7 @@ def test_wrong_class_name() -> None:
     card = create_test_card(link_html)
 
     # This should raise a ZillowParseError due to missing valid link
-    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+    with pytest.raises(ZillowParseError, match=re.escape("Missing Link in card.")):
         ZillowCardParser(card)
 
 
@@ -94,7 +96,7 @@ def test_wrong_data_test_attribute() -> None:
     card = create_test_card(link_html)
 
     # This should raise a ZillowParseError due to missing valid link
-    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+    with pytest.raises(ZillowParseError, match=re.escape("Missing Link in card.")):
         ZillowCardParser(card)
 
 
@@ -108,7 +110,7 @@ def test_missing_data_test_attribute() -> None:
     card = create_test_card(link_html)
 
     # This should raise a ZillowParseError due to missing valid link
-    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+    with pytest.raises(ZillowParseError, match=re.escape("Missing Link in card.")):
         ZillowCardParser(card)
 
 
@@ -122,7 +124,7 @@ def test_href_is_none() -> None:
     card = create_test_card(link_html)
 
     # This should raise a ZillowParseError due to missing valid link
-    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+    with pytest.raises(ZillowParseError, match=re.escape("Missing Link in card.")):
         ZillowCardParser(card)
 
 
@@ -136,7 +138,7 @@ def test_href_is_empty_string() -> None:
     card = create_test_card(link_html)
 
     # This should raise a ZillowParseError due to missing valid link (empty href)
-    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+    with pytest.raises(ZillowParseError, match=re.escape("Missing Link in card.")):
         ZillowCardParser(card)
 
 
@@ -150,7 +152,7 @@ def test_href_is_whitespace_only() -> None:
     card = create_test_card(link_html)
 
     # This should raise a ZillowParseError due to missing valid link (whitespace-only href)
-    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+    with pytest.raises(ZillowParseError, match=re.escape("Missing Link in card.")):
         ZillowCardParser(card)
 
 
@@ -199,5 +201,5 @@ def test_non_string_href_attribute() -> None:
     link_element.attrs["href"] = ["not", "a", "string"]  # List instead of string
 
     # This should raise a ZillowParseError due to invalid href type
-    with pytest.raises(ZillowParseError, match="Missing Link in card."):
+    with pytest.raises(ZillowParseError, match=re.escape("Missing Link in card.")):
         ZillowCardParser(card)
