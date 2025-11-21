@@ -5,16 +5,17 @@ readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
 dependencies = [
-    "beautifulsoup4~=4.13",
-    "python-dotenv~=1.1",
-    "patchright~=1.52",
-    "tqdm~=4.67",
+    "beautifulsoup4~=4.14.0",
+    "python-dotenv~=1.2.0",
+    "patchright~=1.56.0",
+    "tqdm~=4.67.0",
 ]
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Natural Language :: English",
 ]
 
@@ -24,16 +25,16 @@ github = "https://github.com/MaineDSA/zillow_scraper"
 [project.optional-dependencies]
 dev = [
     "bandit[sarif]==1.9.1",
-    "coverage==7.11.0",
-    "mypy==1.18.2",
-    "pre-commit==4.3.0",
-    "pytest-asyncio==1.2.0",
-    "pytest-cov==7.0.0",
-    "pytest-xdist==3.8.0",
-    "pytest==8.4.2",
+    "coverage~=7.12.0",
+    "mypy~=1.18.0",
+    "pre-commit~=4.4.0",
+    "pytest-asyncio~=1.3.0",
+    "pytest-cov~=7.0.0",
+    "pytest-xdist~=3.8.0",
+    "pytest~=9.0.0",
     "ruff==0.14.5",
-    "types-beautifulsoup4==4.12.0.20250516",
-    "types-tqdm==4.67.0.20250809",
+    "types-beautifulsoup4~=4.12.0.20250516",
+    "types-tqdm~=4.67.0.20250809",
 ]
 
 [tool.ruff]
