@@ -43,7 +43,8 @@ async def test_successful_form_submission(mock_page: AsyncMock, form_data: dict[
 
     # Verify all steps were called
     mock_page.goto.assert_called_once_with(form_data["url"])
-    assert mock_page.wait_for_timeout.call_count == 2  # Called twice
+    expected_timeout_call_count = 2
+    assert mock_page.wait_for_timeout.call_count == expected_timeout_call_count
 
     # Verify form fields were filled
     mock_page.fill.assert_any_call(GoogleFormConstants.ADDRESS_INPUT_XPATH, form_data["address"])
@@ -118,10 +119,12 @@ async def test_complete_workflow_simulation() -> None:
 
     # Verify all operations were attempted
     assert page.goto.called
-    assert page.fill.call_count == 3
+    expected_fill_call_count = 3
+    assert page.fill.call_count == expected_fill_call_count
     assert page.click.called
     assert page.wait_for_selector.called
-    assert page.wait_for_timeout.call_count == 2
+    expected_timeout_call_count = 2
+    assert page.wait_for_timeout.call_count == expected_timeout_call_count
 
 
 @pytest.mark.asyncio

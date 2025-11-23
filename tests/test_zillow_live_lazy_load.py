@@ -33,5 +33,6 @@ async def homefinder_zillow_live() -> AsyncGenerator[ZillowHomeFinder]:
 
 @pytest.mark.asyncio
 @pytest.mark.skipif(os.getenv("GITHUB_ACTIONS") == "true", reason="Zillow blocks Github Actions.")
-async def test_homefinder_zillow_lazy_load(homefinder_zillow_live: ZillowHomeFinder) -> None:
-    assert len(homefinder_zillow_live.prices) > 30
+def test_homefinder_zillow_lazy_load(homefinder_zillow_live: ZillowHomeFinder) -> None:
+    min_prices_found = 30
+    assert len(homefinder_zillow_live.prices) > min_prices_found

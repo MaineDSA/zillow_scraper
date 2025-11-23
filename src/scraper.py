@@ -228,7 +228,7 @@ class ZillowHomeFinder:
                 logger.debug("Card %d: Found %d entries", i + 1, len(card_listings))
                 self.listings.extend(card_listings)
             except ZillowParseError as e:
-                logger.error("Skipping card %d due to parse error: %s", i + 1, str(e))
+                logger.error("Skipping card %d due to parse error: %s", i + 1, e)
 
     def __init__(self, soup: BeautifulSoup) -> None:
         self.listings: list[PropertyListing] = []

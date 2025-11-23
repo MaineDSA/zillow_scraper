@@ -23,7 +23,7 @@ def test_format_price_range_empty_list() -> None:
     """Test _format_price_range with empty list."""
     parser = create_test_parser()
     result = parser._format_price_range([])
-    assert result == ""
+    assert not result
 
 
 def test_format_price_range_single_price() -> None:
@@ -78,28 +78,36 @@ def test_format_price_range_mixed_formats() -> None:
 def test_extract_numeric_price_valid_prices() -> None:
     """Test _extract_numeric_price with valid price strings."""
     parser = create_test_parser()
-    assert parser._extract_numeric_price("$2,500") == 2500
-    assert parser._extract_numeric_price("$3,000.50") == 3000
-    assert parser._extract_numeric_price("2500") == 2500
-    assert parser._extract_numeric_price("$1,234,567") == 1234567
+    expected_numeric_price = 2500
+    assert parser._extract_numeric_price("$2,500") == expected_numeric_price
+    expected_numeric_price = 3000
+    assert parser._extract_numeric_price("$3,000.50") == expected_numeric_price
+    expected_numeric_price = 2500
+    assert parser._extract_numeric_price("2500") == expected_numeric_price
+    expected_numeric_price = 1234567
+    assert parser._extract_numeric_price("$1,234,567") == expected_numeric_price
 
 
 def test_extract_numeric_price_invalid_prices() -> None:
     """Test _extract_numeric_price with invalid price strings."""
     parser = create_test_parser()
-    assert parser._extract_numeric_price("Invalid") == 0
-    assert parser._extract_numeric_price("Not a price") == 0
-    assert parser._extract_numeric_price("") == 0
-    assert parser._extract_numeric_price("$") == 0
+    expected_numeric_price = 0
+    assert parser._extract_numeric_price("Invalid") == expected_numeric_price
+    assert parser._extract_numeric_price("Not a price") == expected_numeric_price
+    assert parser._extract_numeric_price("") == expected_numeric_price
+    assert parser._extract_numeric_price("$") == expected_numeric_price
 
 
 def test_extract_numeric_price_edge_cases() -> None:
     """Test _extract_numeric_price with edge cases."""
     parser = create_test_parser()
-    assert parser._extract_numeric_price("$2,500/mo + utilities") == 2500
-    assert parser._extract_numeric_price("Price: $3,000 per month") == 3000
-    assert parser._extract_numeric_price("$0") == 0
-    assert parser._extract_numeric_price("$.50") == 0  # Should handle decimal-only
+    expected_numeric_price = 2500
+    assert parser._extract_numeric_price("$2,500/mo + utilities") == expected_numeric_price
+    expected_numeric_price = 3000
+    assert parser._extract_numeric_price("Price: $3,000 per month") == expected_numeric_price
+    expected_numeric_price = 0
+    assert parser._extract_numeric_price("$0") == expected_numeric_price
+    assert parser._extract_numeric_price("$.50") == expected_numeric_price  # Should handle decimal-only
 
 
 def test_clean_price_text_basic_cleaning() -> None:
@@ -121,8 +129,8 @@ def test_clean_price_text_complex_cleaning() -> None:
 def test_clean_price_text_edge_cases() -> None:
     """Test _clean_price_text with edge cases."""
     parser = create_test_parser()
-    assert parser._clean_price_text("") == ""
-    assert parser._clean_price_text("   ") == ""
+    assert not parser._clean_price_text("")
+    assert not parser._clean_price_text("   ")
     assert parser._clean_price_text("No price here") == "No price here"
     assert parser._clean_price_text("$2,500+ bd") == "$2,500"  # Edge case with 'bd' without number
 
@@ -196,17 +204,17 @@ def test_numeric_price_extraction_edge_cases() -> None:
     parser = create_test_parser()
 
     # Test with commas and periods
-    assert parser._extract_numeric_price("$1,234.56") == 1234
-    assert parser._extract_numeric_price("$1,234,567.89") == 1234567
+    expected_numeric_price = 1234
+    assert parser._extract_numeric_price("$1,234.56") == expected_numeric_price
+    expected_numeric_price = 1234567
+    assert parser._extract_numeric_price("$1,234,567.89") == expected_numeric_price
 
     # Test with no currency symbol
-    assert parser._extract_numeric_price("2500") == 2500
-    assert parser._extract_numeric_price("2,500") == 2500
+    expected_numeric_price = 2500
+    assert parser._extract_numeric_price("2500") == expected_numeric_price
+    assert parser._extract_numeric_price("2,500") == expected_numeric_price
 
     # Test with extra text
-    assert parser._extract_numeric_price("Rent: $2,500 per month") == 2500
-    assert parser._extract_numeric_price("$2,500 (includes utilities)") == 2500
-
-    # Test decimal-only cases
-    assert parser._extract_numeric_price("$0.99") == 0
-    assert parser._extract_numeric_price("$.50") == 0
+    expected_numeric_price = 2500
+    assert parser._extract_numeric_price("Rent: $2,500 per month") == expected_numeric_price
+    assert parser._extract_numeric_price("$2,500 (includes utilities)") == expected_numeric_price

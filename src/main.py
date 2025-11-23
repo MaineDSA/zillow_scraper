@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import sys
 from random import SystemRandom
 
 import dotenv
@@ -77,6 +78,6 @@ if __name__ == "__main__":
 
     if not dotenv_url:
         logger.error("Missing search url in .env")
-        exit()
+        sys.exit()
 
     asyncio.run(main(dotenv_form_url, dotenv_url))

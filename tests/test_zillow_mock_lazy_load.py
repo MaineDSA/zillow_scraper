@@ -26,7 +26,8 @@ async def test_scroll_stops_at_bottom_element() -> None:
     await scroll_and_load_listings(mock_page, max_entries=100, max_scroll_attempts=10)
 
     # Should have called query_selector twice (once per iteration before stopping)
-    assert mock_page.query_selector.call_count == 2
+    expected_query_count = 2
+    assert mock_page.query_selector.call_count == expected_query_count
     # Should have called query_selector with the correct CSS selector
     mock_page.query_selector.assert_called_with("div.search-list-save-search-parent")
 
@@ -49,7 +50,8 @@ async def test_scroll_continues_when_no_bottom_element() -> None:
     await scroll_and_load_listings(mock_page, max_entries=100, max_no_change=3, max_scroll_attempts=10)
 
     # Should have called query_selector multiple times before stopping due to no_change_iterations
-    assert mock_page.query_selector.call_count >= 3
+    min_query_count = 3
+    assert mock_page.query_selector.call_count >= min_query_count
     """Test handling when initial selector times out."""
     mock_page = AsyncMock()
     mock_page.wait_for_selector.side_effect = Exception("Timeout waiting for selector")

@@ -6,14 +6,14 @@ from src.exceptions import ZillowParseError
 from src.scraper import ZillowHomeFinder
 
 
-async def test_homefinder_no_property_cards() -> None:
+def test_homefinder_no_property_cards() -> None:
     """Read Zillow HTML from ../zillow.html and return a ZillowHomeFinder instance."""
     soup = BeautifulSoup("<html></html>", "html.parser")
     with pytest.raises(ZillowParseError, match="No property cards found"):
         ZillowHomeFinder(soup)
 
 
-async def test_homefinder_empty_soup() -> None:
+def test_homefinder_empty_soup() -> None:
     """Read Zillow HTML from ../zillow.html and return a ZillowHomeFinder instance."""
     soup = BeautifulSoup("", "html.parser")
     with pytest.raises(ZillowParseError, match="No property cards found"):

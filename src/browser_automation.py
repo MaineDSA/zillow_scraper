@@ -70,8 +70,7 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
             await page.evaluate(f"window.scrollBy(0, {scroll_amount})")
 
         # Random wait time between scrolls (1-4 seconds)
-        wait_time = cryptogen.randint(1000, 4000)
-        await page.wait_for_timeout(wait_time)
+        await page.wait_for_timeout(cryptogen.randint(1000, 4000))
 
         # Occasionally scroll back up a bit to simulate more natural browsing
         scroll_up_chance: float = 0.15
@@ -87,7 +86,7 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
                 logger.warning(wrn)
                 await page.evaluate(f"window.scrollBy(0, -{back_scroll})")
 
-            await page.wait_for_timeout(cryptogen.randint(500, 1500))
+            await page.wait_for_timeout(cryptogen.randint(1000, 4000))
 
     final_cards = await page.query_selector_all('article[data-test="property-card"]')
     final_count = len(final_cards)
@@ -103,7 +102,7 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
         window.scrollTo(0, 0);
         }
     """)
-    await page.wait_for_timeout(1500)
+    await page.wait_for_timeout(cryptogen.randint(1000, 4000))
 
 
 async def check_and_click_next_page(page: Page) -> bool:
