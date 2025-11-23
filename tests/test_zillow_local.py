@@ -1,18 +1,16 @@
 from pathlib import Path
 
-import pytest_asyncio
-from _pytest.fixtures import FixtureRequest
+import pytest
 from bs4 import BeautifulSoup
 
 from src.scraper import ZillowHomeFinder
 
 
-@pytest_asyncio.fixture(scope="module", params=["04011-20250601"])
-def homefinder_zillow_local(request: FixtureRequest) -> ZillowHomeFinder:
+@pytest.fixture(scope="module")
+def homefinder_zillow_local() -> ZillowHomeFinder:
     """Read Zillow HTML from ../zillow.html and return a ZillowHomeFinder instance."""
-    html = (Path(__file__).parent / f"vendored/zillow-search-{request.param}.html").read_text()
+    html = (Path(__file__).parent / "vendored/zillow-search-04011-20250601.html").read_text()
     soup = BeautifulSoup(html, "html.parser")
-
     return ZillowHomeFinder(soup)
 
 
