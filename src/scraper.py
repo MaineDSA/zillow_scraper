@@ -35,12 +35,6 @@ class ZillowCardParser:
 
     PRICE_REPLACEMENTS: ClassVar[list[str]] = ["utilities", "/mo", "+"]
 
-    def __init__(self, card: Tag) -> None:
-        self.card = card
-        self.address = self._parse_address()
-        self.main_link = self._parse_main_link()
-        self._validate_basics()
-
     def _parse_address(self) -> str:
         """Extract address from property card."""
         address_element = self.card.find("address")
@@ -72,6 +66,12 @@ class ZillowCardParser:
             error_msg = f"Missing {', '.join(missing)} in card."
             raise ZillowParseError(error_msg)
 
+    def __init__(self, card: Tag) -> None:
+        self.card = card
+        self.address = self._parse_address()
+        self.main_link = self._parse_main_link()
+        self._validate_basics()
+
     def _clean_price_text(self, price_text: str) -> str:
         """Clean and standardize price text."""
         cleaned = price_text
@@ -86,7 +86,8 @@ class ZillowCardParser:
 
         return cleaned.strip()
 
-    def _extract_numeric_price(self, price_text: str) -> int:
+    @staticmethod
+    def _extract_numeric_price(price_text: str) -> int:
         """Extract numeric value from price text."""
         numeric_only = re.sub(r"[^\d,.]", "", price_text).replace(",", "")
         try:
@@ -211,10 +212,6 @@ class ZillowCardParser:
 class ZillowHomeFinder:
     """Scrape property data from a Zillow soup object."""
 
-    def __init__(self, soup: BeautifulSoup) -> None:
-        self.listings: list[PropertyListing] = []
-        self._parse_soup(soup)
-
     def _parse_soup(self, soup: BeautifulSoup) -> None:
         """Parse all property cards from soup."""
         cards = soup.find_all("article", attrs={"data-test": "property-card"})
@@ -232,6 +229,10 @@ class ZillowHomeFinder:
                 self.listings.extend(card_listings)
             except ZillowParseError as e:
                 logger.error("Skipping card %d due to parse error: %s", i + 1, str(e))
+
+    def __init__(self, soup: BeautifulSoup) -> None:
+        self.listings: list[PropertyListing] = []
+        self._parse_soup(soup)
 
     @property
     def addresses(self) -> list[str]:

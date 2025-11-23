@@ -12,7 +12,7 @@ from src.scraper import ZillowHomeFinder
 
 @pytest_asyncio.fixture(scope="module")
 async def homefinder_clone_live() -> AsyncGenerator[ZillowHomeFinder]:
-    """Use Playwright to fetch the Zillow Clone HTML and return a ZillowHomeFinder instance."""
+    """Fetch the Zillow Clone HTML and return a ZillowHomeFinder instance."""
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=False)
         context = await browser.new_context(

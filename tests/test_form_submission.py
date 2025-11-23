@@ -6,7 +6,7 @@ from patchright.async_api import TimeoutError as PlaywrightTimeoutError
 from src.constants import GoogleFormConstants
 
 # Assuming your module is named form_submitter
-from src.form_submission import _submit_form  # Replace 'your_module' with actual module name
+from src.form_submission import _submit_form
 
 
 @pytest.fixture
