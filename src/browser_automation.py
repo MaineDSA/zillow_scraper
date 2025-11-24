@@ -8,6 +8,69 @@ logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
 
 
+async def get_property_card_count(page: Page) -> int:
+    """Get the current count of loaded property cards."""
+    cards = await page.query_selector_all('article[data-test="property-card"]')
+    return len(cards)
+
+
+async def is_bottom_element_visible(page: Page) -> bool:
+    """Check if the bottom element is visible in the viewport."""
+    bottom_element = await page.query_selector("div.search-list-save-search-parent")
+    if not bottom_element:
+        return False
+
+    return await page.evaluate(
+        """
+        (element) => {
+            const rect = element.getBoundingClientRect();
+            return rect.top < window.innerHeight && rect.bottom > 0;
+        }
+        """,
+        bottom_element,
+    )
+
+
+async def scroll_down(page: Page, amount: int) -> None:
+    """Scroll down by the specified amount, falling back to window scroll if needed."""
+    try:
+        await page.evaluate(f"""
+            const searchContainer = document.querySelector('[class*="search-page-list-container"]');
+            searchContainer.scrollTop += {amount};
+        """)
+    except PlaywrightError as e:
+        msg = f"Scroll attempt failed: {e}, trying window scroll"
+        logger.warning(msg)
+        await page.evaluate(f"window.scrollBy(0, {amount})")
+
+
+async def perform_human_like_scroll(page: Page) -> None:
+    """Perform a human-like scrolling action with random variations."""
+    scroll_amount = cryptogen.randint(300, 800)
+    await scroll_down(page, scroll_amount)
+    await page.wait_for_timeout(cryptogen.randint(1000, 4000))
+
+    # Occasionally scroll back up
+    scroll_up_chance = 0.15
+    if cryptogen.random() < scroll_up_chance:
+        back_scroll = cryptogen.randint(100, 300)
+        await scroll_down(page, -back_scroll)
+        await page.wait_for_timeout(cryptogen.randint(1000, 4000))
+
+
+async def scroll_to_top(page: Page) -> None:
+    """Scroll back to the top of the page."""
+    await page.evaluate("""
+        const searchContainer = document.querySelector('[class*="search-page-list-container"]');
+        if (searchContainer) {
+            searchContainer.scrollTop = 0;
+        } else {
+            window.scrollTo(0, 0);
+        }
+    """)
+    await page.wait_for_timeout(cryptogen.randint(1000, 4000))
+
+
 async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_change: int = 3, max_scroll_attempts: int = 50) -> None:
     """Scroll through search results to trigger lazy loading."""
     await page.wait_for_selector('[class*="search-page-list-container"]', timeout=10000)
@@ -16,36 +79,22 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
     no_change_iterations = 0
 
     for iteration in range(max_scroll_attempts):
-        current_cards = await page.query_selector_all('article[data-test="property-card"]')
-        current_count = len(current_cards)
-
-        msg = f"Iteration {iteration + 1}: Found {current_count} property cards"
+        current_count = await get_property_card_count(page)
+        msg = f"Iteration {iteration + 1}: Found {current_count} property cardsIteration {iteration + 1}: Found {current_count} property cards"
         logger.debug(msg)
 
+        # Check stopping conditions
         if current_count >= max_entries:
             msg = f"Reached target of {max_entries} entries"
             logger.info(msg)
             break
 
-        # Check if we've reached the bottom of the page (element is visible on screen)
-        bottom_element = await page.query_selector("div.search-list-save-search-parent")
-        if bottom_element:
-            # Check if the element is actually visible in the viewport
-            is_visible = await page.evaluate(
-                """
-                    (element) => {
-                        const rect = element.getBoundingClientRect();
-                        return rect.top < window.innerHeight && rect.bottom > 0;
-                    }
-                """,
-                bottom_element,
-            )
+        if await is_bottom_element_visible(page):
+            msg = "Reached bottom of page (search-list-save-search-parent element is visible)"
+            logger.debug(msg)
+            break
 
-            if is_visible:
-                msg = "Reached bottom of page (search-list-save-search-parent element is visible)"
-                logger.debug(msg)
-                break
-
+        # Track stagnation
         if current_count == previous_count:
             no_change_iterations += 1
             if no_change_iterations >= max_no_change:
@@ -56,53 +105,14 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
 
         previous_count = current_count
 
-        # Scroll down by a random amount (simulate human-like scrolling)
-        scroll_amount = cryptogen.randint(300, 800)
+        # Perform scrolling action
+        await perform_human_like_scroll(page)
 
-        try:
-            await page.evaluate(f"""
-                const searchContainer = document.querySelector('[class*="search-page-list-container"]');
-                searchContainer.scrollTop += {scroll_amount};
-            """)
-        except PlaywrightError as e:
-            wrn = f"Scroll attempt failed: {e}, trying window scroll"
-            logger.warning(wrn)
-            await page.evaluate(f"window.scrollBy(0, {scroll_amount})")
-
-        # Random wait time between scrolls (1-4 seconds)
-        await page.wait_for_timeout(cryptogen.randint(1000, 4000))
-
-        # Occasionally scroll back up a bit to simulate more natural browsing
-        scroll_up_chance: float = 0.15
-        if iteration > 0 and cryptogen.random() < scroll_up_chance:
-            back_scroll = cryptogen.randint(100, 300)
-            try:
-                await page.evaluate(f"""
-                    const searchContainer = document.querySelector('[class*="search-page-list-container"]');
-                    searchContainer.scrollTop += {back_scroll};
-                """)
-            except PlaywrightError as e:
-                wrn = f"Scroll attempt failed: {e}, trying window scroll"
-                logger.warning(wrn)
-                await page.evaluate(f"window.scrollBy(0, -{back_scroll})")
-
-            await page.wait_for_timeout(cryptogen.randint(1000, 4000))
-
-    final_cards = await page.query_selector_all('article[data-test="property-card"]')
-    final_count = len(final_cards)
+    final_count = await get_property_card_count(page)
     msg = f"Lazy loading complete. Total property cards loaded: {final_count}"
     logger.debug(msg)
 
-    # Scroll back to top to ensure all content is properly rendered
-    await page.evaluate("""
-        const searchContainer = document.querySelector('[class*="search-page-list-container"]');
-        if (searchContainer) {
-        searchContainer.scrollTop = 0;
-        } else {
-        window.scrollTo(0, 0);
-        }
-    """)
-    await page.wait_for_timeout(cryptogen.randint(1000, 4000))
+    await scroll_to_top(page)
 
 
 async def check_and_click_next_page(page: Page) -> bool:
