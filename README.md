@@ -31,7 +31,7 @@ The responses are stored in a connected Google Spreadsheet for easy tracking.
     patchright install
     ```
 
-1. Create a file called `.env` in the project directory with the following contents:
+1. Create a folder called `env` in the project directory with one or more files each containing the following contents:
 
     ```bash
     FORM_URL=<YOUR GOOGLE FORMS URL>

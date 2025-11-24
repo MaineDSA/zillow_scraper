@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+from pathlib import Path
 from random import SystemRandom
 
 import dotenv
@@ -72,12 +73,15 @@ async def main(form_url: str | None, url: str) -> None:
 
 
 if __name__ == "__main__":
-    dotenv_values = dotenv.dotenv_values(".env")
-    dotenv_form_url = dotenv_values.get("FORM_URL", None)
-    dotenv_url = dotenv_values.get("SEARCH_URL", ZillowURLs.CLONE_URL)
+    for env_file in Path("env/").iterdir():
+        dotenv_values = dotenv.dotenv_values(env_file)
+        dotenv_form_url = dotenv_values.get("FORM_URL", None)
+        dotenv_url = dotenv_values.get("SEARCH_URL", ZillowURLs.CLONE_URL)
 
-    if not dotenv_url:
-        logger.error("Missing search url in .env")
-        sys.exit()
+        if not dotenv_url:
+            logger.error("Missing search url in .env")
+            sys.exit()
 
-    asyncio.run(main(dotenv_form_url, dotenv_url))
+        msg = f"Processing config: '{env_file}'"
+        logger.info(msg)
+        asyncio.run(main(dotenv_form_url, dotenv_url))
