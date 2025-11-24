@@ -33,7 +33,7 @@ class ZillowCardParser:
         (r"\s+", " ", re.NOFLAG),
     ]
 
-    PRICE_REPLACEMENTS: ClassVar[list[str]] = ["utilities", "/mo", "+"]
+    PRICE_REPLACEMENTS: ClassVar[list[str]] = ["studio", "utilities", "/mo", "+"]
 
     def _parse_address(self) -> str:
         """Extract address from property card."""
