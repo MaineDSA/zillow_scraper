@@ -28,7 +28,7 @@ def load_configs(env_dir: Path | None = None) -> list[ScraperConfig]:
         env_dir = Path("env/")
 
     if not env_dir.exists():
-        logger.error("env/ directory not found")
+        logger.error("%s directory not found", str(env_dir))
         sys.exit(1)
 
     for env_file in env_dir.iterdir():

@@ -143,3 +143,15 @@ class TestLoadConfigs:
             assert "No valid configurations found" in caplog.text
 
         assert exc_info.value.code == 1
+
+    def test_load_configs_missing_folder(self, caplog: LogCaptureFixture) -> None:
+        """Test that having only invalid configs causes system exit."""
+        # Config with no SEARCH_URL and no default used
+        invalid_path = Path("env") / "invalid.env"
+
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(SystemExit) as exc_info:
+                load_configs(invalid_path)
+            assert f"{invalid_path!s} directory not found" in caplog.text
+
+        assert exc_info.value.code == 1
