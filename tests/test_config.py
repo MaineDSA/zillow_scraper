@@ -1,5 +1,7 @@
 """Tests for configuration loading from environment files."""
 
+# ruff: noqa: PLR2004
+
 import logging
 from pathlib import Path
 
@@ -9,8 +11,6 @@ from _pytest.monkeypatch import MonkeyPatch
 
 from src.config import ScraperConfig, load_configs
 from src.constants import ZillowURLs
-
-# ruff: noqa: PLR2004
 
 
 class TestScraperConfig:
