@@ -128,3 +128,12 @@ class TestZillowCardParser:
         parser = ZillowCardParser(card)
         cleaned = parser._clean_price_text(input_price)
         assert cleaned == expected
+
+    def test_bedroom_specific_links(self, property_cards: ResultSet[Tag]) -> None:
+        """Should create bedroom-specific anchor links when applicable."""
+        card = property_cards[1]  # Multi-unit, multi-type building
+        parser = ZillowCardParser(card)
+        listings = parser.parse()
+
+        # Check if listing has bedroom anchors
+        assert any("#bedrooms-" in listing.link for listing in listings)
