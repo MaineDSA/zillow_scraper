@@ -55,7 +55,7 @@ class TestZillowHomeFinder:
             (1, "Address"),
             (2, "Link"),
         ],
-        ids=["Address", "Link"],
+        ids=["address", "link"],
     )
     def test_skip_card_parse_errors(self, caplog: LogCaptureFixture, card_number: int, missing_property: str) -> None:
         """Log parse error when card is skipped, but do not raise exception."""
@@ -156,7 +156,7 @@ class TestZillowCardParser:
                 ],
             ),
         ],
-        ids=["Single Listing Type", "Multiple Listing Types", "Price Range"],
+        ids=["single_type", "multi_type_prices", "multi_type_price_range"],
     )
     def test_parses_apartments(self, property_cards: ResultSet[Tag], card_number: int, expected_listings: list[dict[str, str]]) -> None:
         """Should parse apartment listings."""
@@ -178,7 +178,7 @@ class TestZillowCardParser:
             ("$2,500+ Studio", "$2,500"),
             ("$2,600+ Total Price", "$2,600"),
         ],
-        ids=["bd", "bds", "studio", "total price"],
+        ids=["bd", "bds", "studio", "total_price"],
     )
     def test_price_cleaning_removes_extra_text(self, property_cards: ResultSet[Tag], input_price: str, expected: str) -> None:
         """Price cleaning should remove unwanted text."""
