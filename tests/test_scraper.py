@@ -6,8 +6,9 @@ These tests validate the parsing logic against real Zillow HTML structure.
 
 # ruff: noqa: PLR2004
 
+from collections.abc import Iterable
 from pathlib import Path
-from typing import get_args, get_origin, Iterable
+from typing import get_args, get_origin
 
 import pytest
 from bs4 import BeautifulSoup, ResultSet, Tag
@@ -137,3 +138,12 @@ class TestZillowCardParser:
 
         # Check if listing has bedroom anchors
         assert any("#bedrooms-" in listing.link for listing in listings)
+
+    def test_units_count_extraction(self, property_cards: ResultSet[Tag]) -> None:
+        """Should extract units available count for listing with 'available units'."""
+        card = property_cards[21]  # Multi-unit with 'available units' shown
+        parser = ZillowCardParser(card)
+        units = parser._get_units_count()
+        assert units > 1
+        listings = parser.parse()
+        assert all("10 units available" in listing.address for listing in listings)
