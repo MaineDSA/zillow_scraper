@@ -4,14 +4,18 @@ Test cases for Zillow scraper functionality.
 These tests validate the parsing logic against real Zillow HTML structure.
 """
 
+import logging
+
 # ruff: noqa: PLR2004
 from collections.abc import Iterable
 from pathlib import Path
 from typing import get_args, get_origin
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 from bs4 import BeautifulSoup, ResultSet, Tag
 
+from src.constants import ZillowParseError
 from src.scraper import ZillowCardParser, ZillowHomeFinder
 
 
@@ -31,6 +35,37 @@ def property_cards(zillow_search_page: BeautifulSoup) -> ResultSet[Tag]:
 
 class TestZillowHomeFinder:
     """Tests for the main ZillowHomeFinder class."""
+
+    def test_no_cards_error(self) -> None:
+        """Throw parse error when card is skipped."""
+        page_html = """
+        <!doctype html>
+        <html lang="en">
+            <head><title>Example Domain</title></head>
+            <body><div><p>This domain is for use in documentation examples without needing permission.</div></body>
+        </html>
+        """
+        page = BeautifulSoup(page_html, "html.parser")
+        with pytest.raises(ZillowParseError, match="No property cards found"):
+            ZillowHomeFinder(page)
+
+    @pytest.mark.parametrize(
+        ("card_number", "missing_property"),
+        [
+            (1, "Address"),
+            (2, "Link"),
+        ],
+        ids=["Address", "Link"],
+    )
+    def test_skip_card_parse_errors(self, caplog: LogCaptureFixture, card_number: int, missing_property: str) -> None:
+        """Log parse error when card is skipped, but do not raise exception."""
+        html_example_folder = Path("tests/vendored")
+        html_text = (html_example_folder / "zillow-card-parse-error.html").read_text(encoding="utf-8")
+        page = BeautifulSoup(html_text, "html.parser")
+
+        with caplog.at_level(logging.ERROR):
+            ZillowHomeFinder(page)
+        assert caplog.text.__contains__(f"Skipping card {card_number} due to parse error: Missing {missing_property} in card.")
 
     def test_finds_property_listings(self, zillow_search_page: BeautifulSoup) -> None:
         """Check number of property listings found on the page."""
