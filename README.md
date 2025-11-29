@@ -2,16 +2,16 @@
 
 [Full report](https://htmlpreview.github.io/?https://github.com/MaineDSA/zillow_scraper/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-| Name                       |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
-|--------------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
-| src/\_\_init\_\_.py        |        0 |        0 |        0 |        0 |    100% |           |
-| src/browser\_automation.py |       72 |       16 |       12 |        0 |     81% |   124-151 |
-| src/constants.py           |        9 |        0 |        0 |        0 |    100% |           |
-| src/exceptions.py          |        1 |        0 |        0 |        0 |    100% |           |
-| src/form\_submission.py    |       20 |        0 |        0 |        0 |    100% |           |
-| src/main.py                |       44 |       44 |        2 |        0 |      0% |      1-71 |
-| src/scraper.py             |      165 |       13 |       56 |        6 |     90% |130-131, 137, 146, 150, 170->168, 175, 206-207, 254-259 |
-|                  **TOTAL** |  **311** |   **73** |   **70** |    **6** | **78%** |           |
+| Name                    |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
+|------------------------ | -------: | -------: | -------: | -------: | ------: | --------: |
+| src/\_\_init\_\_.py     |        0 |        0 |        0 |        0 |    100% |           |
+| src/automation.py       |      113 |       82 |       12 |        0 |     28% |21-27, 35-36, 41-45, 58-65, 70-79, 84-92, 97-132, 141-168, 173-187, 195-201, 206-223 |
+| src/config.py           |       27 |        1 |        6 |        1 |     94% |        28 |
+| src/constants.py        |       10 |        0 |        0 |        0 |    100% |           |
+| src/form\_submission.py |       33 |       33 |        0 |        0 |      0% |      3-52 |
+| src/main.py             |       25 |       25 |        0 |        0 |      0% |      3-54 |
+| src/scraper.py          |      156 |       23 |       52 |       15 |     82% |47, 51, 60, 62, 65-66, 94-95, 100, 102, 109, 120, 129-130, 145, 149, 169->167, 174, 190, 205-206, 218-219, 229 |
+|               **TOTAL** |  **364** |  **164** |   **70** |   **16** | **57%** |           |
 
 
 ## Setup coverage badge
