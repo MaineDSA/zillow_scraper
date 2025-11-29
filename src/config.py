@@ -7,7 +7,7 @@ from pathlib import Path
 
 import dotenv
 
-from .constants import ZillowURLs
+from src.constants import ZillowURLs
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +21,11 @@ class ScraperConfig:
     config_name: str
 
 
-def load_configs() -> list[ScraperConfig]:
+def load_configs(env_dir: Path | None = None) -> list[ScraperConfig]:
     """Load all configurations from env directory."""
     configs = []
-    env_dir = Path("env/")
+    if not env_dir:
+        env_dir = Path("env/")
 
     if not env_dir.exists():
         logger.error("env/ directory not found")

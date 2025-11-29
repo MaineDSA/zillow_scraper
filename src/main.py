@@ -5,9 +5,9 @@ import logging
 
 from patchright.async_api import ViewportSize, async_playwright
 
-from .automation import deduplicate_listings, scrape_all_pages, sort_by_newest
-from .config import ScraperConfig, load_configs
-from .form_submission import submit_listings
+from src.automation import deduplicate_listings, scrape_all_pages, sort_by_newest
+from src.config import ScraperConfig, load_configs
+from src.form_submission import submit_listings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

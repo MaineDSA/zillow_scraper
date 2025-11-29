@@ -7,8 +7,8 @@ from patchright.async_api import Page
 from patchright.async_api import TimeoutError as PlaywrightTimeoutError
 from tqdm import tqdm
 
-from .constants import GoogleFormConstants
-from .scraper import PropertyListing
+from src.constants import GoogleFormConstants
+from src.scraper import PropertyListing
 
 logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()

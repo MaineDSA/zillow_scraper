@@ -8,7 +8,7 @@ from typing import ClassVar
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 
-from .constants import ZillowParseError
+from src.constants import ZillowParseError
 
 logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()

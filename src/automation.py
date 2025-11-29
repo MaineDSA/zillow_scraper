@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from patchright.async_api import Browser, BrowserContext, Page, ViewportSize, async_playwright
 from patchright.async_api import Error as PlaywrightError
 
-from .scraper import PropertyListing, ZillowHomeFinder
+from src.scraper import PropertyListing, ZillowHomeFinder
 
 logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
