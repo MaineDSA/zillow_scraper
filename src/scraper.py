@@ -132,11 +132,21 @@ class ZillowCardParser:
 
     def _create_specific_link(self, bed_info: str) -> str:
         """Create link with bedroom anchor if applicable."""
-        if not bed_info or "bd" not in bed_info.lower():
+        if not bed_info:
             return self.main_link
 
-        bed_num = re.search(r"\d+", bed_info)
-        return f"{self.main_link}#bedrooms-{bed_num.group()}" if bed_num else self.main_link
+        bed_info_lower = bed_info.lower()
+
+        # Handle Studio units
+        if "studio" in bed_info_lower:
+            return f"{self.main_link}#bedrooms-0"
+
+        # Handle bedroom units (1bd, 2bd, etc.)
+        if "bd" in bed_info_lower:
+            bed_num = re.search(r"\d+", bed_info)
+            return f"{self.main_link}#bedrooms-{bed_num.group()}" if bed_num else self.main_link
+
+        return self.main_link
 
     def _get_main_price_listings(self) -> list[PropertyListing]:
         """Extract main price from property card."""

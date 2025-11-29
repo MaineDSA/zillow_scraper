@@ -1,4 +1,4 @@
-"""Tests for automation.py functions."""
+"""Tests for automation.py."""
 
 # ruff: noqa: PLR2004
 
