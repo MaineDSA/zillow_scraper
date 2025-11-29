@@ -7,6 +7,7 @@ These tests validate the parsing logic against real Zillow HTML structure.
 # ruff: noqa: PLR2004
 
 from pathlib import Path
+from typing import get_args, get_origin, Iterable
 
 import pytest
 from bs4 import BeautifulSoup, ResultSet, Tag
@@ -49,23 +50,26 @@ class TestZillowHomeFinder:
         finder = ZillowHomeFinder(zillow_search_page)
         assert len(finder.listings) >= len(property_cards)
 
-    def test_addresses_property_returns_list(self, zillow_search_page: BeautifulSoup) -> None:
-        """Addresses properties should return a list of strings."""
+    @pytest.mark.parametrize(
+        ("property_name", "property_type"),
+        [
+            ("addresses", list[str]),
+            ("prices", list[str]),
+            ("links", list[str]),
+        ],
+        ids=["addresses", "prices", "links"],
+    )
+    def test_listing_property_returns_type(self, zillow_search_page: BeautifulSoup, property_name: str, property_type: type) -> None:
+        """Properties should return a list of strings."""
         finder = ZillowHomeFinder(zillow_search_page)
-        assert isinstance(finder.addresses, list)
-        assert all(isinstance(addr, str) for addr in finder.addresses)
+        listing_property = getattr(finder, property_name)
 
-    def test_prices_property_returns_list(self, zillow_search_page: BeautifulSoup) -> None:
-        """Prices properties should return a list of strings."""
-        finder = ZillowHomeFinder(zillow_search_page)
-        assert isinstance(finder.prices, list)
-        assert all(isinstance(price, str) for price in finder.prices)
+        property_origin = get_origin(property_type)
+        property_args = get_args(property_type)
 
-    def test_links_property_returns_list(self, zillow_search_page: BeautifulSoup) -> None:
-        """Links properties should return a list of strings."""
-        finder = ZillowHomeFinder(zillow_search_page)
-        assert isinstance(finder.links, list)
-        assert all(isinstance(link, str) for link in finder.links)
+        assert isinstance(listing_property, property_origin)
+        assert isinstance(listing_property, Iterable)
+        assert all(isinstance(listing_property_item, property_args[0]) for listing_property_item in listing_property)
 
 
 class TestZillowCardParser:
