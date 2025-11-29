@@ -136,6 +136,8 @@ class TestLoadConfigs:
         # Config with no SEARCH_URL and no default used
         invalid_file = temp_env_dir / "invalid.env"
         invalid_file.write_text("SEARCH_URL=\n")
+        sub_dir = temp_env_dir / "misc"
+        sub_dir.mkdir()
 
         with caplog.at_level(logging.ERROR):
             with pytest.raises(SystemExit) as exc_info:
