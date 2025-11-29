@@ -5,8 +5,8 @@
 
 # Zillow Clone Scraper and Form Auto-Filler
 
-This Python script scrapes apartment listings from a Zillow clone site and automatically submits the address, price, and link of each listing into a Google Form.
-The responses are stored in a connected Google Spreadsheet for easy tracking.
+This Python script scrapes apartment listings from a Zillow clone site and optionally submits the address, price, and link of each listing into a Google Form.
+The responses can be stored in a connected Google Spreadsheet for easy tracking.
 
 ## Features
 
@@ -27,7 +27,7 @@ The responses are stored in a connected Google Spreadsheet for easy tracking.
 1. Install python dependencies
 
     ```shell
-    pip install -r .\pyproject.toml
+    pip install .
     patchright install
     ```
 
@@ -40,7 +40,7 @@ The responses are stored in a connected Google Spreadsheet for easy tracking.
 1. Run the script:
 
     ```shell
-    python src/main.py
+    python -m src.main
     ```
 
-The script will open a Chrome window, scrape data from the Zillow clone, and submit each entry into your form.
+The script will open a Chrome window, scrape data from each page of the Zillow clone, and submit each entry into your form.
