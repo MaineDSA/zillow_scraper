@@ -81,22 +81,43 @@ class TestZillowCardParser:
     @pytest.mark.parametrize(
         ("card_number", "expected_listings"),
         [
-            (0, [{"address": "95 Saint Alphonsus St, Roxbury Crossing, MA", "price": "$4,919", "link": "zillow.com/apartments/boston-ma/95-saint/CkBG9z"}]),
+            (
+                0,
+                [
+                    {
+                        "address": "95 Saint, 95 Saint Alphonsus St, Roxbury Crossing, MA 02120",
+                        "price": "$4,919",
+                        "link": "https://www.zillow.com/apartments/boston-ma/95-saint/CkBG9z/",
+                    }
+                ],
+            ),
             (
                 1,
                 [
-                    {"address": "80 Rugg Rd, Allston, MA", "price": "$2,975", "link": "zillow.com/apartments/allston-ma/harper/Cm4BqX"},
-                    {"address": "80 Rugg Rd, Allston, MA", "price": "$3,524", "link": "zillow.com/apartments/allston-ma/harper/Cm4BqX"},
-                    {"address": "80 Rugg Rd, Allston, MA", "price": "$4,333", "link": "zillow.com/apartments/allston-ma/harper/Cm4BqX"},
+                    {
+                        "address": "Harper  80 Rugg Rd, Allston, MA (Studio)",
+                        "price": "$2,975",
+                        "link": "https://www.zillow.com/apartments/allston-ma/harper/Cm4BqX/#bedrooms-0",
+                    },
+                    {
+                        "address": "Harper  80 Rugg Rd, Allston, MA (1bd)",
+                        "price": "$3,524",
+                        "link": "https://www.zillow.com/apartments/allston-ma/harper/Cm4BqX/#bedrooms-1",
+                    },
+                    {
+                        "address": "Harper  80 Rugg Rd, Allston, MA (2bd)",
+                        "price": "$4,333",
+                        "link": "https://www.zillow.com/apartments/allston-ma/harper/Cm4BqX/#bedrooms-2",
+                    },
                 ],
             ),
             (
                 3,
                 [
                     {
-                        "address": "1575 Tremont St, Roxbury Crossing, MA",
+                        "address": "The Longwood  1575 Tremont St, Roxbury Crossing, MA (7 units available)",
                         "price": "$2,850 - $3,761",
-                        "link": "zillow.com/apartments/boston-ma/the-longwood/5XmPS7",
+                        "link": "https://www.zillow.com/apartments/boston-ma/the-longwood/5XmPS7/",
                     }
                 ],
             ),
@@ -111,9 +132,9 @@ class TestZillowCardParser:
 
         assert len(listings) == len(expected_listings)
         for i, listing in enumerate(listings):
-            assert expected_listings[i]["address"] in listing.address
-            assert expected_listings[i]["price"] in listing.price
-            assert expected_listings[i]["link"] in listing.link
+            assert expected_listings[i]["address"] == listing.address
+            assert expected_listings[i]["price"] == listing.price
+            assert expected_listings[i]["link"] == listing.link
 
     @pytest.mark.parametrize(
         ("input_price", "expected"),
