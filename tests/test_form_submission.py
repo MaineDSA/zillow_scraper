@@ -1,4 +1,4 @@
-"""Test for empty listings in submit_listings function."""
+"""Tests for form_submission.py."""
 
 import logging
 from typing import TYPE_CHECKING
