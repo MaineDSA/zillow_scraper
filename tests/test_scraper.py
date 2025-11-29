@@ -147,3 +147,12 @@ class TestZillowCardParser:
         assert units > 1
         listings = parser.parse()
         assert all("10 units available" in listing.address for listing in listings)
+
+    def test_units_price_range_extraction(self, property_cards: ResultSet[Tag]) -> None:
+        """Should extract price range for listing with 'available units'."""
+        card = property_cards[21]  # Multi-unit with 'available units' shown
+        parser = ZillowCardParser(card)
+        units = parser._get_units_count()
+        assert units > 1
+        listings = parser.parse()
+        assert all(" - " in listing.price for listing in listings)
