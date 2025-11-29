@@ -1,3 +1,5 @@
+"""Zillow scraping and parsing functionality."""
+
 import logging
 import re
 from dataclasses import dataclass
@@ -5,11 +7,8 @@ from random import SystemRandom
 from typing import ClassVar
 
 from bs4 import BeautifulSoup, NavigableString, Tag
-from patchright.async_api import Page
-from tqdm import tqdm
 
-from src.exceptions import ZillowParseError
-from src.form_submission import _submit_form
+from .constants import ZillowParseError
 
 logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
@@ -33,7 +32,7 @@ class ZillowCardParser:
         (r"\s+", " ", re.NOFLAG),
     ]
 
-    PRICE_REPLACEMENTS: ClassVar[list[str]] = ["studio", "utilities", "/mo", "+"]
+    PRICE_REPLACEMENTS: ClassVar[list[str]] = [r"studio", r"utilities", r"/mo", r"\+"]
 
     def _parse_address(self) -> str:
         """Extract address from property card."""
@@ -82,7 +81,7 @@ class ZillowCardParser:
 
         # Apply string replacements
         for replacement in self.PRICE_REPLACEMENTS:
-            cleaned = cleaned.replace(replacement, "")
+            cleaned = re.sub(replacement, "", cleaned, flags=re.IGNORECASE)
 
         return cleaned.strip()
 
@@ -248,12 +247,3 @@ class ZillowHomeFinder:
     def links(self) -> list[str]:
         """Get all links."""
         return [listing.link for listing in self.listings]
-
-    async def upload_data(self, page: Page, url: str | None) -> None:
-        """Upload all listings to a Google Form."""
-        if not url:
-            err = "Missing URL for Google Form"
-            raise ValueError(err)
-
-        for listing in tqdm(self.listings, unit="entry"):
-            await _submit_form(page, url, listing.address, listing.price, listing.link)
