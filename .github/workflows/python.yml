@@ -50,7 +50,7 @@ jobs:
 
       - run: uv pip install --system -e .[dev]
 
-      - run: patchright install
+#      - run: patchright install
 
       - id: cache-pytest
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
@@ -58,11 +58,15 @@ jobs:
           path: .pytest_cache
           key: ${{ runner.os }}-pytest-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
 
-      - uses: GabrielBB/xvfb-action@5bcda06da84ba084708898801da79736b88e00a9
+      - run: pytest
         env:
           COVERAGE_FILE: .coverage.${{ runner.os }}.${{ matrix.python-version }}
-        with:
-          run: pytest
+
+#      - uses: GabrielBB/xvfb-action@5bcda06da84ba084708898801da79736b88e00a9
+#        env:
+#          COVERAGE_FILE: .coverage.${{ runner.os }}.${{ matrix.python-version }}
+#        with:
+#          run: pytest
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
         with:
