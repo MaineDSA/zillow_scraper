@@ -5,7 +5,6 @@ These tests validate the parsing logic against real Zillow HTML structure.
 """
 
 # ruff: noqa: PLR2004
-
 from collections.abc import Iterable
 from pathlib import Path
 from typing import get_args, get_origin
@@ -19,9 +18,9 @@ from src.scraper import ZillowCardParser, ZillowHomeFinder
 @pytest.fixture
 def zillow_search_page() -> BeautifulSoup:
     """Load the vendored Zillow search results page."""
-    html_path = Path("tests/vendored/zillow-search-boston-20251128-1.html")
-    with Path(html_path).open(encoding="utf-8") as f:
-        return BeautifulSoup(f.read(), "html.parser")
+    html_example_folder = Path("tests/vendored")
+    html_text = (html_example_folder / "zillow-search-boston-20251128-1.html").read_text(encoding="utf-8")
+    return BeautifulSoup(html_text, "html.parser")
 
 
 @pytest.fixture
