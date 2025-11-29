@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from bs4 import BeautifulSoup, ResultSet, Tag
 
-from src.scraper import ZillowHomeFinder
+from src.scraper import ZillowCardParser, ZillowHomeFinder
 
 
 @pytest.fixture
@@ -66,3 +66,61 @@ class TestZillowHomeFinder:
         finder = ZillowHomeFinder(zillow_search_page)
         assert isinstance(finder.links, list)
         assert all(isinstance(link, str) for link in finder.links)
+
+
+class TestZillowCardParser:
+    """Tests for individual property card parsing."""
+
+    @pytest.mark.parametrize(
+        ("card_number", "expected_listings"),
+        [
+            (0, [{"address": "95 Saint Alphonsus St, Roxbury Crossing, MA", "price": "$4,919", "link": "zillow.com/apartments/boston-ma/95-saint/CkBG9z"}]),
+            (
+                1,
+                [
+                    {"address": "80 Rugg Rd, Allston, MA", "price": "$2,975", "link": "zillow.com/apartments/allston-ma/harper/Cm4BqX"},
+                    {"address": "80 Rugg Rd, Allston, MA", "price": "$3,524", "link": "zillow.com/apartments/allston-ma/harper/Cm4BqX"},
+                    {"address": "80 Rugg Rd, Allston, MA", "price": "$4,333", "link": "zillow.com/apartments/allston-ma/harper/Cm4BqX"},
+                ],
+            ),
+            (
+                3,
+                [
+                    {
+                        "address": "1575 Tremont St, Roxbury Crossing, MA",
+                        "price": "$2,850 - $3,761",
+                        "link": "zillow.com/apartments/boston-ma/the-longwood/5XmPS7",
+                    }
+                ],
+            ),
+        ],
+        ids=["Single Listing Type", "Multiple Listing Types", "Price Range"],
+    )
+    def test_parses_apartments(self, property_cards: ResultSet[Tag], card_number: int, expected_listings: list[dict[str, str]]) -> None:
+        """Should parse apartment listings."""
+        card = property_cards[card_number]
+        parser = ZillowCardParser(card)
+        listings = parser.parse()
+
+        assert len(listings) == len(expected_listings)
+        for i, listing in enumerate(listings):
+            assert expected_listings[i]["address"] in listing.address
+            assert expected_listings[i]["price"] in listing.price
+            assert expected_listings[i]["link"] in listing.link
+
+    @pytest.mark.parametrize(
+        ("input_price", "expected"),
+        [
+            ("$2,667+ 1 bd", "$2,667"),
+            ("$3,000+ 2 bds", "$3,000"),
+            ("$2,500+ Studio", "$2,500"),
+            ("$2,600+ Total Price", "$2,600"),
+        ],
+        ids=["bd", "bds", "studio", "total price"],
+    )
+    def test_price_cleaning_removes_extra_text(self, property_cards: ResultSet[Tag], input_price: str, expected: str) -> None:
+        """Price cleaning should remove unwanted text."""
+        card = property_cards[0]
+        parser = ZillowCardParser(card)
+        cleaned = parser._clean_price_text(input_price)
+        assert cleaned == expected
