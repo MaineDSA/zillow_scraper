@@ -52,7 +52,7 @@ class TestZillowHomeFinder:
         assert len(finder.listings) >= len(property_cards)
 
     @pytest.mark.parametrize(
-        ("property_name", "property_type"),
+        ("property_name", "property_type_full"),
         [
             ("addresses", list[str]),
             ("prices", list[str]),
@@ -60,17 +60,19 @@ class TestZillowHomeFinder:
         ],
         ids=["addresses", "prices", "links"],
     )
-    def test_listing_property_returns_type(self, zillow_search_page: BeautifulSoup, property_name: str, property_type: type) -> None:
+    def test_listing_property_returns_type(self, zillow_search_page: BeautifulSoup, property_name: str, property_type_full: type) -> None:
         """Properties should return a list of strings."""
         finder = ZillowHomeFinder(zillow_search_page)
         listing_property = getattr(finder, property_name)
 
-        property_origin = get_origin(property_type)
-        property_args = get_args(property_type)
+        property_type_origin = get_origin(property_type_full)
+        assert isinstance(property_type_origin, type)
+        property_type_arg = get_args(property_type_full)[0]
+        assert isinstance(property_type_arg, type)
 
-        assert isinstance(listing_property, property_origin)
-        assert isinstance(listing_property, Iterable)
-        assert all(isinstance(listing_property_item, property_args[0]) for listing_property_item in listing_property)
+        assert isinstance(listing_property, property_type_origin)
+        assert isinstance(listing_property, Iterable)  # needed for typechecker
+        assert all(isinstance(listing_property_item, property_type_arg) for listing_property_item in listing_property)
 
 
 class TestZillowCardParser:
