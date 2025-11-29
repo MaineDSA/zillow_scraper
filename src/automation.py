@@ -1,11 +1,33 @@
+"""Browser automation, configuration, and page processing."""
+
 import logging
 from random import SystemRandom
 
+from bs4 import BeautifulSoup
+from patchright.async_api import Browser, BrowserContext, Page, ViewportSize, async_playwright
 from patchright.async_api import Error as PlaywrightError
-from patchright.async_api import Page
+
+from src.scraper import PropertyListing, ZillowHomeFinder
 
 logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
+
+
+# Browser Configuration
+
+
+async def create_browser_context() -> tuple[Browser, BrowserContext]:
+    """Create and configure browser with context."""
+    p = await async_playwright().start()
+    browser = await p.chromium.launch(headless=False)
+    context = await browser.new_context(
+        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+        viewport=ViewportSize(width=1280, height=768),
+    )
+    return browser, context
+
+
+# Browser Automation - Scrolling and Navigation
 
 
 async def get_property_card_count(page: Page) -> int:
@@ -39,8 +61,7 @@ async def scroll_down(page: Page, amount: int) -> None:
             searchContainer.scrollTop += {amount};
         """)
     except PlaywrightError as e:
-        msg = f"Scroll attempt failed: {e}, trying window scroll"
-        logger.warning(msg)
+        logger.warning("Scroll attempt failed: %s, trying window scroll", e)
         await page.evaluate(f"window.scrollBy(0, {amount})")
 
 
@@ -80,18 +101,15 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
 
     for iteration in range(max_scroll_attempts):
         current_count = await get_property_card_count(page)
-        msg = f"Iteration {iteration + 1}: Found {current_count} property cardsIteration {iteration + 1}: Found {current_count} property cards"
-        logger.debug(msg)
+        logger.debug("Iteration %s: Found %s property cards", iteration + 1, current_count)
 
         # Check stopping conditions
         if current_count >= max_entries:
-            msg = f"Reached target of {max_entries} entries"
-            logger.info(msg)
+            logger.info("Reached target of %s entries", max_entries)
             break
 
         if await is_bottom_element_visible(page):
-            msg = "Reached bottom of page (search-list-save-search-parent element is visible)"
-            logger.debug(msg)
+            logger.debug("Reached bottom of page (search-list-save-search-parent element is visible)")
             break
 
         # Track stagnation
@@ -109,8 +127,7 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
         await perform_human_like_scroll(page)
 
     final_count = await get_property_card_count(page)
-    msg = f"Lazy loading complete. Total property cards loaded: {final_count}"
-    logger.debug(msg)
+    logger.debug("Lazy loading complete. Total property cards loaded: %s", final_count)
 
     await scroll_to_top(page)
 
@@ -149,3 +166,84 @@ async def check_and_click_next_page(page: Page) -> bool:
     except TimeoutError as e:
         logger.warning("Error checking for next page button: %s", e)
         return False
+
+
+async def sort_by_newest(page: Page) -> None:
+    """Sort listings by newest first."""
+    sort_button = page.locator("button[id='sort-popover']").first
+    if not sort_button:
+        logger.error("No sort page button found")
+        return
+
+    await sort_button.click()
+    await page.wait_for_load_state()
+
+    newest_button = page.get_by_text("Newest")
+    if not newest_button:
+        logger.error("No sort page by newest button found")
+        return
+
+    await newest_button.click()
+    await page.wait_for_load_state()
+
+
+# Page Processing
+
+
+async def scrape_single_page(page: Page) -> list[PropertyListing]:
+    """Scrape listings from a single page."""
+    await scroll_and_load_listings(page)
+
+    html = await page.content()
+    soup = BeautifulSoup(html, "html.parser")
+
+    finder = ZillowHomeFinder(soup)
+    return finder.listings
+
+
+async def scrape_all_pages(page: Page) -> list[PropertyListing]:
+    """Scrape all pages of listings, returning all listings found."""
+    all_listings: list[PropertyListing] = []
+    page_number = 1
+
+    while True:
+        logger.debug("Scraping page %s", page_number)
+
+        page_listings = await scrape_single_page(page)
+        all_listings.extend(page_listings)
+        logger.debug("Found %s listings on page %s", len(page_listings), page_number)
+
+        if not await check_and_click_next_page(page):
+            logger.debug("No more pages to process or next button is disabled")
+            break
+
+        page_number += 1
+
+    logger.info("Total listings scraped: %s from %s page(s)", len(all_listings), page_number)
+    return all_listings
+
+
+# Data Processing
+
+
+def deduplicate_listings(listings: list[PropertyListing]) -> list[PropertyListing]:
+    """Deduplicate listings based on unique combination of address, price, and link."""
+    seen = set()
+    unique_listings = []
+    duplicates_removed = 0
+
+    for listing in listings:
+        # Create a unique key from the listing
+        key = (listing.address, listing.price, listing.link)
+
+        if key not in seen:
+            seen.add(key)
+            unique_listings.append(listing)
+        else:
+            duplicates_removed += 1
+
+    if duplicates_removed > 0:
+        logger.debug("Removed %s duplicate listings", duplicates_removed)
+
+    logger.debug("Unique listings after deduplication: %s", len(unique_listings))
+    return unique_listings

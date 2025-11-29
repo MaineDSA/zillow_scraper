@@ -1,3 +1,5 @@
+"""Constants and custom exceptions."""
+
 from typing import ClassVar
 
 
@@ -15,3 +17,7 @@ class GoogleFormConstants:
     PRICE_INPUT_XPATH: ClassVar[str] = 'xpath=//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div/div[1]/input'
     LINK_INPUT_XPATH: ClassVar[str] = 'xpath=//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div/div[1]/input'
     SUBMIT_BUTTON_XPATH: ClassVar[str] = 'xpath=//*[@id="mG61Hd"]/div[2]/div/div[3]/div/div[1]/div'
+
+
+class ZillowParseError(Exception):
+    """Custom exception for Zillow scraping errors."""
