@@ -91,7 +91,7 @@ class ZillowCardParser:
         numeric_only = re.sub(r"[^\d,.]", "", price_text).replace(",", "")
         try:
             return int(float(numeric_only))
-        except (ValueError, TypeError):
+        except ValueError:
             return 0
 
     def _format_price_range(self, prices: list[str]) -> str:
