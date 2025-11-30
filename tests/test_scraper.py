@@ -219,3 +219,11 @@ class TestZillowCardParser:
         card = property_cards[0]
         parser = ZillowCardParser(card)
         assert parser._extract_numeric_price("1.500.00") == 0
+
+    def test_format_price_range_guard_clauses(self, property_cards: ResultSet[Tag]) -> None:
+        """Invalid strings shouldn't raise ValueError."""
+        card = property_cards[0]
+        parser = ZillowCardParser(card)
+        assert not parser._format_price_range([])
+        assert parser._format_price_range(["$1,000"]) == "$1,000"
+        assert parser._format_price_range(["$1,000", "Call for price"]) == "$1,000"
