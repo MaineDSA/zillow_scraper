@@ -130,15 +130,12 @@ class ZillowCardParser:
             return self.main_link
 
         bed_info_lower = bed_info.lower()
-
-        # Handle Studio units
         if "studio" in bed_info_lower:
             return f"{self.main_link}#bedrooms-0"
-
-        # Handle bedroom units (1bd, 2bd, etc.)
         if "bd" in bed_info_lower:
             bed_num = re.search(r"\d+", bed_info)
-            return f"{self.main_link}#bedrooms-{bed_num.group()}" if bed_num else self.main_link
+            if bed_num:
+                return f"{self.main_link}#bedrooms-{bed_num.group()}"
 
         return self.main_link
 
