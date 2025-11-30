@@ -213,3 +213,9 @@ class TestZillowCardParser:
         assert units > 1
         listings = parser.parse()
         assert all(" - " in listing.price for listing in listings)
+
+    def test_numeric_price_extraction_exception_handling(self, property_cards: ResultSet[Tag]) -> None:
+        """Invalid strings shouldn't raise ValueError."""
+        card = property_cards[0]
+        parser = ZillowCardParser(card)
+        assert parser._extract_numeric_price("1.500.00") == 0
