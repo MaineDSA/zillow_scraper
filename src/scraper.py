@@ -4,7 +4,7 @@ import logging
 import re
 from dataclasses import dataclass
 from random import SystemRandom
-from typing import ClassVar
+from typing import ClassVar, cast
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 
@@ -42,15 +42,10 @@ class ZillowCardParser:
     def _parse_main_link(self) -> str:
         """Extract main property link from property card."""
         link_element = self.card.find("a", class_="property-card-link", attrs={"data-test": "property-card-link"})
-
-        if not link_element or isinstance(link_element, NavigableString):
+        if not isinstance(link_element, Tag):
             return ""
 
-        href = link_element.get("href", "")
-        if not href or not isinstance(href, str) or not href.strip():
-            return ""
-
-        href = href.strip()
+        href = cast("str", link_element.get("href", "")).strip()
         return href if href.startswith("http") else f"https://www.zillow.com{href}"
 
     def _validate_basics(self) -> None:
