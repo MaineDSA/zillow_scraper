@@ -312,7 +312,7 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: .pre-commit-cache
-          key: ${{ runner.os }}-pre-commit-3.13
+          key: ${{ runner.os }}-pre-commit-3.13-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run pre-commit on all files
         run: |
