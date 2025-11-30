@@ -193,9 +193,6 @@ class ZillowCardParser:
         listings = []
         for price, bed_info in price_bed_pairs:
             address = self.address + (f" ({bed_info})" if bed_info else "")
-            if units_count > 1:
-                address += f" ({units_count} units available)"
-
             specific_link = self._create_specific_link(bed_info)
             listings.append(PropertyListing(address, price, specific_link))
 
