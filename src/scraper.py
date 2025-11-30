@@ -180,9 +180,6 @@ class ZillowCardParser:
                 bed_info = bed_elements[i].get_text(strip=True) if i < len(bed_elements) else ""
                 price_bed_pairs.append((price_text, bed_info))
 
-        if not price_bed_pairs:
-            return []
-
         units_count = self._get_units_count()
 
         # Handle multiple units with price range
