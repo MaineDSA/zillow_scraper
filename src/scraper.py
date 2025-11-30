@@ -98,7 +98,7 @@ class ZillowCardParser:
         """Format prices into a range or single price."""
         if not prices:
             return None
-        if len(prices) == 1:
+        if len(prices) == 1 and self._extract_numeric_price(prices[0]):
             return prices[0]
 
         price_values: list[tuple[str, int]] = []
