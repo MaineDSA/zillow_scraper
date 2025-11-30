@@ -256,3 +256,29 @@ class TestZillowCardParser:
         parser = ZillowCardParser(card)
         result = parser._create_specific_link(bed_info)
         assert "#bedrooms" not in result
+
+    @pytest.mark.parametrize(
+        "price_text",
+        [
+            "",
+            "   Total Price     ",
+        ],
+        ids=["price_empty_string", "price_empty_after_cleaning"],
+    )
+    def test_returns_empty_when_price_element_exists_but_empty(self, price_text: str) -> None:
+        """Test that empty list is returned when price element exists but has no text."""
+        html = f"""
+        <article data-test="property-card">
+            <address>123 Main St</address>
+            <a class="property-card-link" data-test="property-card-link" href="/property/123">Link</a>
+            <span data-test="property-card-price">{price_text}</span>
+        </article>
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        card = soup.find("article")
+        assert isinstance(card, Tag)
+
+        parser = ZillowCardParser(card)
+        result = parser._get_main_price_listings()
+
+        assert result == []
