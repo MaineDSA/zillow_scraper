@@ -149,7 +149,6 @@ class TestZillowCardParser:
         card = property_cards[card_number]
         parser = ZillowCardParser(card)
         listings = parser.parse()
-
         assert len(listings) == len(expected_listings)
         for i, listing in enumerate(listings):
             assert expected_listings[i]["address"] == listing.address
@@ -178,8 +177,6 @@ class TestZillowCardParser:
         card = property_cards[1]  # Multi-unit, multi-type building
         parser = ZillowCardParser(card)
         listings = parser.parse()
-
-        # Check if listing has bedroom anchors
         assert any("#bedrooms-" in listing.link for listing in listings)
 
     def test_units_count_extraction(self, property_cards: ResultSet[Tag]) -> None:
@@ -233,10 +230,8 @@ class TestZillowCardParser:
         soup = BeautifulSoup(html, "html.parser")
         card = soup.find("article")
         assert isinstance(card, Tag)
-
         parser = ZillowCardParser(card)
         units_count = parser._get_units_count()
-
         assert units_count == 1
 
     @pytest.mark.parametrize(
@@ -277,8 +272,32 @@ class TestZillowCardParser:
         soup = BeautifulSoup(html, "html.parser")
         card = soup.find("article")
         assert isinstance(card, Tag)
-
         parser = ZillowCardParser(card)
         result = parser._get_main_price_listings()
-
         assert result == []
+
+    @pytest.mark.parametrize(
+        "price_element",
+        [
+            "",
+            '<span data-test="property-card-price">     </span>',
+            '<span data-test="property-card-price">  Total Price   </span>',
+        ],
+        ids=["price_missing", "price_empty", "price_cleaned"],
+    )
+    def test_parse_raises_error_when_price_invalid_or_missing(self, price_element: str) -> None:
+        """Test error raised when card has no inventory and price is only whitespace."""
+        html = f"""
+        <article data-test="property-card">
+            <address>456 Oak Ave</address>
+            <a class="property-card-link" data-test="property-card-link" href="/property/456">Link</a>
+            {price_element}
+        </article>
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        card = soup.find("article")
+        assert isinstance(card, Tag)
+        parser = ZillowCardParser(card)
+
+        with pytest.raises(ZillowParseError, match="No valid prices found in card"):
+            parser.parse()
