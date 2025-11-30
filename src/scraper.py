@@ -86,32 +86,34 @@ class ZillowCardParser:
         return cleaned.strip()
 
     @staticmethod
-    def _extract_numeric_price(price_text: str) -> int:
+    def _extract_numeric_price(price_text: str) -> int | None:
         """Extract numeric value from price text."""
         numeric_only = re.sub(r"[^\d,.]", "", price_text).replace(",", "")
         try:
             return int(float(numeric_only))
         except ValueError:
-            return 0
+            return None
 
-    def _format_price_range(self, prices: list[str]) -> str:
+    def _format_price_range(self, prices: list[str]) -> str | None:
         """Format prices into a range or single price."""
         if not prices:
-            return ""
+            return None
         if len(prices) == 1:
             return prices[0]
 
-        # Filter and sort valid prices
-        valid_prices = [(price, self._extract_numeric_price(price)) for price in prices]
-        valid_prices = [(price, value) for price, value in valid_prices if value > 0]
+        price_values: list[tuple[str, int]] = []
+        for price in prices:
+            value = self._extract_numeric_price(price)
+            if value and value > 0:
+                price_values.append((price, value))
 
-        if not valid_prices:
-            return prices[0]
+        if not price_values:
+            return None
 
-        valid_prices.sort(key=lambda x: x[1])
-        min_price, max_price = valid_prices[0][0], valid_prices[-1][0]
+        price_values.sort(key=lambda x: x[1])
+        min_price, max_price = price_values[0][0], price_values[-1][0]
 
-        return min_price if valid_prices[0][1] == valid_prices[-1][1] else f"{min_price} - {max_price}"
+        return min_price if price_values[0][1] == price_values[-1][1] else f"{min_price} - {max_price}"
 
     def _get_units_count(self) -> int:
         """Extract number of available units."""
@@ -186,8 +188,9 @@ class ZillowCardParser:
         if units_count > 1 and len(price_bed_pairs) > 1:
             prices = [price for price, _ in price_bed_pairs]
             price_range = self._format_price_range(prices)
-            address = f"{self.address} ({units_count} units available)"
-            return [PropertyListing(address, price_range, self.main_link)]
+            if price_range:
+                address = f"{self.address} ({units_count} units available)"
+                return [PropertyListing(address, price_range, self.main_link)]
 
         # Create individual listings
         listings = []

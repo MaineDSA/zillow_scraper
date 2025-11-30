@@ -204,12 +204,20 @@ class TestZillowCardParser:
         """Invalid strings shouldn't raise ValueError."""
         card = property_cards[0]
         parser = ZillowCardParser(card)
-        assert parser._extract_numeric_price("1.500.00") == 0
+        assert not parser._extract_numeric_price("1.500.00")
 
-    def test_format_price_range_guard_clauses(self, property_cards: ResultSet[Tag]) -> None:
+    @pytest.mark.parametrize(
+        ("input_prices", "expected"),
+        [
+            ([], None),
+            (["Wouldn't you like to know", "Call for price"], None),
+            (["$1,000"], "$1,000"),
+            (["$1,000", "Call for price"], "$1,000"),
+        ],
+        ids=["empty_list", "no_usable_prices", "one_price", "usable_and_unusable_prices"],
+    )
+    def test_format_price_range_guard_clauses(self, property_cards: ResultSet[Tag], input_prices: list[str], expected: str | None) -> None:
         """Invalid strings shouldn't raise ValueError."""
         card = property_cards[0]
         parser = ZillowCardParser(card)
-        assert not parser._format_price_range([])
-        assert parser._format_price_range(["$1,000"]) == "$1,000"
-        assert parser._format_price_range(["$1,000", "Call for price"]) == "$1,000"
+        assert parser._format_price_range(input_prices) == expected
