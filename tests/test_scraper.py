@@ -19,20 +19,6 @@ from src.constants import ZillowParseError
 from src.scraper import ZillowCardParser, ZillowHomeFinder
 
 
-@pytest.fixture
-def zillow_search_page() -> BeautifulSoup:
-    """Load the vendored Zillow search results page."""
-    html_example_folder = Path("tests/vendored")
-    html_text = (html_example_folder / "zillow-search-boston-20251128-1.html").read_text(encoding="utf-8")
-    return BeautifulSoup(html_text, "html.parser")
-
-
-@pytest.fixture
-def property_cards(zillow_search_page: BeautifulSoup) -> ResultSet[Tag]:
-    """Extract all property cards from the search page."""
-    return zillow_search_page.find_all("article", attrs={"data-test": "property-card"})
-
-
 class TestZillowHomeFinder:
     """Tests for the main ZillowHomeFinder class."""
 
