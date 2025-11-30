@@ -1,9 +1,26 @@
 """Tests for automation.py."""
 
-# ruff: noqa: PLR2004
+from unittest.mock import AsyncMock, patch
 
-from src.automation import deduplicate_listings
+import pytest
+
+# ruff: noqa: PLR2004
+from src.automation import deduplicate_listings, scrape_single_page
 from src.scraper import PropertyListing
+
+
+@pytest.mark.asyncio
+async def test_scrape_single_page_success(zillow_search_page_html: str) -> None:
+    """Test scraping of single page (ensure multiple listings are found using test html)."""
+    mock_page = AsyncMock()
+    mock_page.content.return_value = zillow_search_page_html
+
+    with patch("src.automation.scroll_and_load_listings", new_callable=AsyncMock) as mock_scroll:
+        listings = await scrape_single_page(mock_page)
+    mock_scroll.assert_called_once_with(mock_page)
+    mock_page.content.assert_called_once()
+
+    assert len(listings) > 1
 
 
 def test_deduplicate_no_duplicates() -> None:
