@@ -47,10 +47,13 @@ class ZillowCardParser:
             return ""
 
         href = link_element.get("href", "")
-        if not href or not isinstance(href, str) or not href.strip():
+        if not isinstance(href, str):
             return ""
 
         href = href.strip()
+        if not href:
+            return ""
+        
         return href if href.startswith("http") else f"https://www.zillow.com{href}"
 
     def _validate_basics(self) -> None:
