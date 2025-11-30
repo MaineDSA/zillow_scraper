@@ -221,3 +221,20 @@ class TestZillowCardParser:
         card = property_cards[0]
         parser = ZillowCardParser(card)
         assert parser._format_price_range(input_prices) == expected
+
+    def test_no_badge_area_returns_1(self) -> None:
+        """Test when badge area is not found (badge_area is None)."""
+        html = """
+        <article data-test="property-card">
+            <address>123 Main St</address>
+            <a class="property-card-link" data-test="property-card-link" href="/homedetails/123">Link</a>
+        </article>
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        card = soup.find("article")
+        assert isinstance(card, Tag)
+
+        parser = ZillowCardParser(card)
+        units_count = parser._get_units_count()
+
+        assert units_count == 1
