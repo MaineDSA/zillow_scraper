@@ -126,10 +126,7 @@ class ZillowCardParser:
             badge_text = badge.get_text(strip=True).lower()
             unit_match = re.search(r"(\d+)\s+(?:available\s+)?units?", badge_text)
             if unit_match:
-                try:
-                    return int(unit_match.group(1))
-                except ValueError:
-                    continue
+                return int(unit_match.group(1))
         return 1
 
     def _create_specific_link(self, bed_info: str) -> str:
