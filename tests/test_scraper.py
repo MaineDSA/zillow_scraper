@@ -301,3 +301,31 @@ class TestZillowCardParser:
 
         with pytest.raises(ZillowParseError, match="No valid prices found in card"):
             parser.parse()
+
+    @pytest.mark.parametrize(
+        ("price_text", "bed_text"),
+        [
+            ("", "2 bd"),
+            ("bd", "Studio"),
+        ],
+        ids=["price_text_empty", "price_text_cleaned"],
+    )
+    def test_get_inventory_listings_with_empty_prices(self, price_text: str, bed_text: str) -> None:
+        """Test that _get_inventory_listings returns an empty list when inventory set price text is empty."""
+        html = f"""
+        <article data-test="property-card">
+            <address>123 Test St</address>
+            <a class="property-card-link" data-test="property-card-link" href="/test">Link</a>
+            <div class="property-card-inventory-set-random123">
+                <span class="PriceText-random123">{price_text}</span>
+                <span class="BedText-random123">{bed_text}</span>
+            </div>
+        </article>
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        card = soup.find("article")
+        assert isinstance(card, Tag)
+        parser = ZillowCardParser(card)
+
+        listings = parser._get_inventory_listings()
+        assert listings == []
