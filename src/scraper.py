@@ -177,9 +177,8 @@ class ZillowCardParser:
         if units_count > 1 and len(price_bed_pairs) > 1:
             prices = [price for price, _ in price_bed_pairs]
             price_range = self._format_price_range(prices)
-            if price_range:
-                address = f"{self.address} ({units_count} units available)"
-                return [PropertyListing(address, price_range, self.main_link)]
+            address = f"{self.address} ({units_count} units available)"
+            return [PropertyListing(address, price_range, self.main_link)]
 
         # Create individual listings
         listings = []
