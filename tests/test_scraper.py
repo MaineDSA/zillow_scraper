@@ -40,8 +40,9 @@ class TestZillowHomeFinder:
         [
             (1, "Address"),
             (2, "Link"),
+            (3, "Address, Link"),
         ],
-        ids=["address", "link"],
+        ids=["address", "link", "address_and_link"],
     )
     def test_skip_card_parse_errors(self, caplog: LogCaptureFixture, card_number: int, missing_property: str) -> None:
         """Log parse error when card is skipped, but do not raise exception."""
