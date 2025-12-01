@@ -1,7 +1,5 @@
 """Tests for configuration loading from environment files."""
 
-# ruff: noqa: PLR2004
-
 import logging
 from pathlib import Path
 

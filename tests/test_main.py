@@ -1,7 +1,5 @@
 """Tests for main.py."""
 
-# ruff: noqa: PLR2004
-
 import logging
 from collections.abc import Coroutine
 from unittest.mock import patch

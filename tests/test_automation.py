@@ -1,7 +1,5 @@
 """Tests for automation.py."""
 
-# ruff: noqa: PLR2004
-
 from unittest.mock import AsyncMock, patch
 
 import pytest

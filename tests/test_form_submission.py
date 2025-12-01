@@ -1,7 +1,5 @@
 """Tests for form_submission.py."""
 
-# ruff: noqa: PLR2004
-
 import logging
 from unittest.mock import AsyncMock, call, patch
 

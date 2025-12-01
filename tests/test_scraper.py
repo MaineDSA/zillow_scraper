@@ -4,8 +4,6 @@ Test cases for Zillow scraper functionality.
 These tests validate the parsing logic against real Zillow HTML structure.
 """
 
-# ruff: noqa: PLR2004
-
 import logging
 from collections.abc import Iterable
 from pathlib import Path
