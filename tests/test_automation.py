@@ -1,10 +1,11 @@
 """Tests for automation.py."""
 
+# ruff: noqa: PLR2004
+
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
-# ruff: noqa: PLR2004
 from src.automation import deduplicate_listings, scrape_single_page
 from src.scraper import PropertyListing
 
