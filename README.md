@@ -2,16 +2,11 @@
 
 [Full report](https://htmlpreview.github.io/?https://github.com/MaineDSA/zillow_scraper/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-| Name                    |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
-|------------------------ | -------: | -------: | -------: | -------: | ------: | --------: |
-| src/\_\_init\_\_.py     |        0 |        0 |        0 |        0 |    100% |           |
-| src/automation.py       |      113 |       77 |       12 |        0 |     32% |21-27, 35-36, 41-45, 58-65, 70-79, 84-92, 97-132, 141-168, 173-187, 206-223 |
-| src/config.py           |       27 |        1 |        6 |        1 |     94% |        28 |
-| src/constants.py        |       10 |        0 |        0 |        0 |    100% |           |
-| src/form\_submission.py |       33 |       11 |        0 |        0 |     67% |30-32, 43-52 |
-| src/main.py             |       22 |       13 |        0 |        0 |     41% |     18-47 |
-| src/scraper.py          |      155 |        0 |       56 |        0 |    100% |           |
-|               **TOTAL** |  **360** |  **102** |   **74** |    **1** | **74%** |           |
+| Name                  |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
+|---------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
+| tests/\_\_init\_\_.py |        0 |        0 |        0 |        0 |    100% |           |
+| tests/conftest.py     |       13 |        4 |        0 |        0 |     69% |10-11, 17, 23 |
+|             **TOTAL** |   **13** |    **4** |    **0** |    **0** | **69%** |           |
 
 
 ## Setup coverage badge
