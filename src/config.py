@@ -4,6 +4,7 @@ import logging
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import dotenv
 
@@ -38,7 +39,7 @@ def load_configs(env_dir: Path | None = None) -> list[ScraperConfig]:
         dotenv_values = dotenv.dotenv_values(env_file)
         form_url = dotenv_values.get("FORM_URL", None)
         search_url = dotenv_values.get("SEARCH_URL", ZillowURLs.CLONE_URL)
-        config_name = dotenv_values.get("CONFIG_NAME", env_file.name)
+        config_name = cast("str", dotenv_values.get("CONFIG_NAME", env_file.name))  # mypy doesn't know env_file.name is returned as default
 
         if not search_url:
             logger.error("Missing search url in %s", env_file)
