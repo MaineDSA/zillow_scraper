@@ -52,7 +52,7 @@ def main() -> None:
     for config in load_configs():
         logger.info("Processing config: '%s'", config.config_name)
         asyncio.run(scrape_zillow(config))
-        logger.info("Completed config: '%s'", config.config_name)
+        logger.debug("Completed config: '%s'", config.config_name)
 
 
 if __name__ == "__main__":
