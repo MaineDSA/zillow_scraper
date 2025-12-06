@@ -45,7 +45,7 @@ def load_configs(env_dir: Path | None = None) -> list[ScraperConfig]:
             continue
 
         configs.append(ScraperConfig(form_url=form_url, search_url=search_url, config_name=config_name))
-        logger.info("Loaded config: '%s'", env_file)
+        logger.debug("Loaded config: '%s'", env_file)
 
     if not configs:
         logger.error("No valid configurations found")

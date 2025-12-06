@@ -213,7 +213,7 @@ class ZillowHomeFinder:
             error_msg = "No property cards found."
             raise ZillowParseError(error_msg)
 
-        logger.info("Found %d property cards to parse", len(cards))
+        logger.debug("Found %d property cards to parse", len(cards))
 
         for i, card in enumerate(cards):
             try:

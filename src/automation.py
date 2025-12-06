@@ -116,7 +116,7 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
         if current_count == previous_count:
             no_change_iterations += 1
             if no_change_iterations >= max_no_change:
-                logger.info("No new content loaded after several attempts, stopping")
+                logger.warning("No new content loaded after several attempts, stopping")
                 break
         else:
             no_change_iterations = 0
@@ -204,6 +204,7 @@ async def scrape_single_page(page: Page) -> list[PropertyListing]:
 async def scrape_all_pages(page: Page) -> list[PropertyListing]:
     """Scrape all pages of listings, returning all listings found."""
     all_listings: list[PropertyListing] = []
+
     page_number = 1
 
     while True:
@@ -219,7 +220,7 @@ async def scrape_all_pages(page: Page) -> list[PropertyListing]:
 
         page_number += 1
 
-    logger.info("Total listings scraped: %s from %s page(s)", len(all_listings), page_number)
+    logger.debug("Total listings scraped: %s from %s page(s)", len(all_listings), page_number)
     return all_listings
 
 
