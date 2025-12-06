@@ -6,6 +6,7 @@ from random import SystemRandom
 from bs4 import BeautifulSoup
 from patchright.async_api import Browser, BrowserContext, Page, ViewportSize, async_playwright
 from patchright.async_api import Error as PlaywrightError
+from tqdm import tqdm
 
 from src.scraper import PropertyListing, ZillowHomeFinder
 
@@ -207,18 +208,21 @@ async def scrape_all_pages(page: Page) -> list[PropertyListing]:
 
     page_number = 1
     has_next_page = True
-    while has_next_page:
-        logger.debug("Scraping page %s", page_number)
+    with tqdm(desc="Scraping pages", unit="page") as pbar:
+        while has_next_page:
+            logger.debug("Scraping page %s", page_number)
 
-        page_listings = await scrape_single_page(page)
-        all_listings.extend(page_listings)
-        logger.debug("Found %s listings on page %s", len(page_listings), page_number)
+            page_listings = await scrape_single_page(page)
+            all_listings.extend(page_listings)
+            logger.debug("Found %s listings on page %s", len(page_listings), page_number)
 
-        has_next_page = await check_and_click_next_page(page)
-        if not has_next_page:
-            logger.debug("No more pages to process or next button is disabled")
+            has_next_page = await check_and_click_next_page(page)
+            if not has_next_page:
+                logger.debug("No more pages to process or next button is disabled")
 
-        page_number += 1
+            page_number += 1
+            pbar.update(1)
+            pbar.set_postfix({"listings": len(all_listings)})
 
     logger.debug("Total listings scraped: %s from %s page(s)", len(all_listings), page_number)
     return all_listings
