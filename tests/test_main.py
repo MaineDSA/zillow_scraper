@@ -21,7 +21,7 @@ def test_main_with_mocked_configs(caplog: LogCaptureFixture) -> None:
         coro.close()  # Close the coroutine to prevent RuntimeWarning
 
     with patch("src.main.load_configs", return_value=mock_config), patch("src.main.asyncio.run", side_effect=mock_run_impl) as mock_run:
-        with caplog.at_level(logging.INFO):
+        with caplog.at_level(logging.DEBUG):
             main()
 
         mock_run.assert_called()
