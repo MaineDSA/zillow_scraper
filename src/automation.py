@@ -206,17 +206,17 @@ async def scrape_all_pages(page: Page) -> list[PropertyListing]:
     all_listings: list[PropertyListing] = []
 
     page_number = 1
-
-    while True:
+    has_next_page = True
+    while has_next_page:
         logger.debug("Scraping page %s", page_number)
 
         page_listings = await scrape_single_page(page)
         all_listings.extend(page_listings)
         logger.debug("Found %s listings on page %s", len(page_listings), page_number)
 
-        if not await check_and_click_next_page(page):
+        has_next_page = await check_and_click_next_page(page)
+        if not has_next_page:
             logger.debug("No more pages to process or next button is disabled")
-            break
 
         page_number += 1
 
