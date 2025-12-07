@@ -8,7 +8,7 @@ from typing import cast
 
 import dotenv
 
-from src.constants import ZillowURLs
+from src.constants import CLONE_URL
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def load_configs(env_dir: Path | None = None) -> list[ScraperConfig]:
 
         dotenv_values = dotenv.dotenv_values(env_file)
         form_url = dotenv_values.get("FORM_URL", None)
-        search_url = dotenv_values.get("SEARCH_URL", ZillowURLs.CLONE_URL)
+        search_url = dotenv_values.get("SEARCH_URL", CLONE_URL)
         config_name = cast("str", dotenv_values.get("CONFIG_NAME", env_file.name))  # mypy doesn't know env_file.name is returned as default
 
         if not search_url:

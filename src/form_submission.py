@@ -7,7 +7,7 @@ from patchright.async_api import Page
 from patchright.async_api import TimeoutError as PlaywrightTimeoutError
 from tqdm import tqdm
 
-from src.constants import GoogleFormConstants
+from src.constants import MAX_WAIT_TIME, MIN_WAIT_TIME, GoogleFormConstants
 from src.scraper import PropertyListing
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ cryptogen = SystemRandom()
 async def _submit_single_listing(page: Page, url: str, listing: PropertyListing) -> None:
     """Submit a single listing to the Google Form."""
     await page.goto(url)
-    await page.wait_for_timeout(cryptogen.randint(1000, 3000))
+    await page.wait_for_timeout(cryptogen.randint(MIN_WAIT_TIME, MAX_WAIT_TIME))
 
     await page.fill(GoogleFormConstants.ADDRESS_INPUT_XPATH, listing.address)
     await page.fill(GoogleFormConstants.PRICE_INPUT_XPATH, listing.price)
@@ -31,7 +31,7 @@ async def _submit_single_listing(page: Page, url: str, listing: PropertyListing)
         error_msg = f"Form submission confirmation not received for {listing.address}"
         raise PlaywrightTimeoutError(error_msg) from e
 
-    await page.wait_for_timeout(cryptogen.randint(1000, 1500))
+    await page.wait_for_timeout(cryptogen.randint(MIN_WAIT_TIME, MAX_WAIT_TIME))
 
 
 async def submit_listings(page: Page, form_url: str, listings: list[PropertyListing]) -> None:

@@ -8,7 +8,7 @@ from _pytest.logging import LogCaptureFixture
 from _pytest.monkeypatch import MonkeyPatch
 
 from src.config import ScraperConfig, load_configs
-from src.constants import ZillowURLs
+from src.constants import CLONE_URL
 
 
 class TestScraperConfig:
@@ -99,7 +99,7 @@ class TestLoadConfigs:
         configs = load_configs(temp_env_dir)
 
         assert len(configs) == 1
-        assert configs[0].search_url == ZillowURLs.CLONE_URL
+        assert configs[0].search_url == CLONE_URL
 
     def test_load_config_skips_empty_search_url(self, caplog: LogCaptureFixture, temp_env_dir: Path) -> None:
         """Test that configs with empty SEARCH_URL are skipped."""

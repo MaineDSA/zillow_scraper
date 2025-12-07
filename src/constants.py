@@ -2,12 +2,18 @@
 
 from typing import ClassVar
 
+CLONE_URL = "https://appbrewery.github.io/Zillow-Clone/"
 
-class ZillowURLs:
-    """Constants for Zillow request handling."""
+VIEWPORT_WIDTH = 1280
+VIEWPORT_HEIGHT = 720
 
-    ZILLOW_URL: ClassVar[str] = "https://www.zillow.com/portland-me-04101/rentals/"
-    CLONE_URL: ClassVar[str] = "https://appbrewery.github.io/Zillow-Clone/"
+MIN_WAIT_TIME = 1000
+MAX_WAIT_TIME = 3000
+MIN_SCROLL_DOWN = 300
+MAX_SCROLL_DOWN = 800
+MIN_SCROLL_UP = 100
+MAX_SCROLL_UP = 300
+PROBABILITY_SCROLL_UP = 0.15
 
 
 class GoogleFormConstants:

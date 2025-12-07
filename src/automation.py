@@ -7,13 +7,21 @@ from bs4 import BeautifulSoup
 from patchright.async_api import Browser, BrowserContext, Page, ViewportSize, async_playwright
 from tqdm import tqdm
 
+from src.constants import (
+    MAX_SCROLL_DOWN,
+    MAX_SCROLL_UP,
+    MAX_WAIT_TIME,
+    MIN_SCROLL_DOWN,
+    MIN_SCROLL_UP,
+    MIN_WAIT_TIME,
+    PROBABILITY_SCROLL_UP,
+    VIEWPORT_HEIGHT,
+    VIEWPORT_WIDTH,
+)
 from src.scraper import PropertyListing, ZillowHomeFinder
 
 logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
-
-
-# Browser Configuration
 
 
 async def create_browser_context() -> tuple[Browser, BrowserContext]:
@@ -22,7 +30,7 @@ async def create_browser_context() -> tuple[Browser, BrowserContext]:
     browser = await p.chromium.launch(headless=False)
     context = await browser.new_context(
         user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-        viewport=ViewportSize(width=1280, height=768),
+        viewport=ViewportSize(width=VIEWPORT_WIDTH, height=VIEWPORT_HEIGHT),
     )
     return browser, context
 
@@ -65,24 +73,23 @@ async def scroll_down(page: Page, amount: int) -> None:
                     window.scrollBy(0, {%s});
                 }
             """,
-        amount,
-        amount,
+            amount,
+            amount,
         )
     )
 
 
 async def perform_human_like_scroll(page: Page) -> None:
     """Perform a human-like scrolling action with random variations."""
-    scroll_amount = cryptogen.randint(300, 800)
+    scroll_amount = cryptogen.randint(MIN_SCROLL_DOWN, MAX_SCROLL_DOWN)
     await scroll_down(page, scroll_amount)
-    await page.wait_for_timeout(cryptogen.randint(1000, 4000))
+    await page.wait_for_timeout(cryptogen.randint(MIN_WAIT_TIME, MAX_WAIT_TIME))
 
     # Occasionally scroll back up
-    scroll_up_chance = 0.15
-    if cryptogen.random() < scroll_up_chance:
-        back_scroll = cryptogen.randint(100, 300)
+    if cryptogen.random() < PROBABILITY_SCROLL_UP:
+        back_scroll = cryptogen.randint(MIN_SCROLL_UP, MAX_SCROLL_UP)
         await scroll_down(page, -back_scroll)
-        await page.wait_for_timeout(cryptogen.randint(1000, 4000))
+        await page.wait_for_timeout(cryptogen.randint(MIN_WAIT_TIME, MAX_WAIT_TIME))
 
 
 async def scroll_to_top(page: Page) -> None:
@@ -95,7 +102,7 @@ async def scroll_to_top(page: Page) -> None:
             window.scrollTo(0, 0);
         }
     """)
-    await page.wait_for_timeout(cryptogen.randint(1000, 4000))
+    await page.wait_for_timeout(cryptogen.randint(MIN_WAIT_TIME, MAX_WAIT_TIME))
 
 
 async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_change: int = 3, max_scroll_attempts: int = 50) -> None:
