@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_145eef247bfb46b6_constants_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.12.0">coverage.py v7.12.0</a>,
-            created at 2025-12-06 23:16 +0000
+            created at 2025-12-07 23:05 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -92,7 +92,7 @@
     <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="key">import</span> <span class="nam">dotenv</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">constants</span> <span class="key">import</span> <span class="nam">ZillowURLs</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">constants</span> <span class="key">import</span> <span class="nam">CLONE_URL</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="nam">logger</span> <span class="op">=</span> <span class="nam">logging</span><span class="op">.</span><span class="nam">getLogger</span><span class="op">(</span><span class="nam">__name__</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -122,7 +122,7 @@
     <p class="pln"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">        <span class="nam">dotenv_values</span> <span class="op">=</span> <span class="nam">dotenv</span><span class="op">.</span><span class="nam">dotenv_values</span><span class="op">(</span><span class="nam">env_file</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">        <span class="nam">form_url</span> <span class="op">=</span> <span class="nam">dotenv_values</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">"FORM_URL"</span><span class="op">,</span> <span class="key">None</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">        <span class="nam">search_url</span> <span class="op">=</span> <span class="nam">dotenv_values</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">"SEARCH_URL"</span><span class="op">,</span> <span class="nam">ZillowURLs</span><span class="op">.</span><span class="nam">CLONE_URL</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">        <span class="nam">search_url</span> <span class="op">=</span> <span class="nam">dotenv_values</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">"SEARCH_URL"</span><span class="op">,</span> <span class="nam">CLONE_URL</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">        <span class="nam">config_name</span> <span class="op">=</span> <span class="nam">cast</span><span class="op">(</span><span class="str">"str"</span><span class="op">,</span> <span class="nam">dotenv_values</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">"CONFIG_NAME"</span><span class="op">,</span> <span class="nam">env_file</span><span class="op">.</span><span class="nam">name</span><span class="op">)</span><span class="op">)</span>  <span class="com"># mypy doesn't know env_file.name is returned as default</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">search_url</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -146,7 +146,7 @@
             <a class="nav" href="z_145eef247bfb46b6_constants_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.12.0">coverage.py v7.12.0</a>,
-            created at 2025-12-06 23:16 +0000
+            created at 2025-12-07 23:05 +0000
         </p>
     </div>
 </footer>
