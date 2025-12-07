@@ -5,16 +5,12 @@ from random import SystemRandom
 
 from bs4 import BeautifulSoup
 from patchright.async_api import Browser, BrowserContext, Page, ViewportSize, async_playwright
-from patchright.async_api import Error as PlaywrightError
 from tqdm import tqdm
 
 from src.scraper import PropertyListing, ZillowHomeFinder
 
 logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
-
-
-# Browser Configuration
 
 
 async def create_browser_context() -> tuple[Browser, BrowserContext]:
@@ -56,14 +52,16 @@ async def is_bottom_element_visible(page: Page) -> bool:
 
 async def scroll_down(page: Page, amount: int) -> None:
     """Scroll down by the specified amount, falling back to window scroll if needed."""
-    try:
-        await page.evaluate(f"""
+    await page.evaluate(
+        f"""
             const searchContainer = document.querySelector('[class*="search-page-list-container"]');
-            searchContainer.scrollTop += {amount};
-        """)
-    except PlaywrightError as e:
-        logger.warning("Scroll attempt failed: %s, trying window scroll", e)
-        await page.evaluate(f"window.scrollBy(0, {amount})")
+            if (searchContainer) {{
+                searchContainer.scrollTop += {amount};
+            }} else {{
+                window.scrollBy(0, {amount});
+            }}
+        """
+    )
 
 
 async def perform_human_like_scroll(page: Page) -> None:
