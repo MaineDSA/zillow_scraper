@@ -28,6 +28,11 @@ class PropertyListing:
 class ZillowCardParser:
     """Handles parsing of individual property cards."""
 
+    # Only compile the patterns that are used multiple times per card
+    _PATTERN_NUMERIC = re.compile(r"[^\d,.]")
+    _PATTERN_UNIT_COUNT = re.compile(r"(\d+)\s+(?:available\s+)?units?")
+    _PATTERN_BED_NUM = re.compile(r"\d+")
+
     PRICE_CLEANUP_PATTERNS: ClassVar[list[tuple[str, str, re.RegexFlag]]] = [
         (r"\+?\s*\d+\s*bds?(?:\s|$)", "", re.IGNORECASE),
         (r"\+?\s*bd(?:\s|$)", "", re.IGNORECASE),
@@ -82,10 +87,9 @@ class ZillowCardParser:
 
         return cleaned.strip()
 
-    @staticmethod
-    def _extract_numeric_price(price_text: str) -> int | None:
+    def _extract_numeric_price(self, price_text: str) -> int | None:
         """Extract numeric value from price text."""
-        numeric_only = re.sub(r"[^\d,.]", "", price_text).replace(",", "")
+        numeric_only = self._PATTERN_NUMERIC.sub("", price_text).replace(",", "")
         try:
             return int(float(numeric_only))
         except ValueError:
@@ -121,7 +125,7 @@ class ZillowCardParser:
         badges = badge_area.find_all("span", class_=re.compile(r"StyledPropertyCardBadge"))
         for badge in badges:
             badge_text = badge.get_text(strip=True).lower()
-            unit_match = re.search(r"(\d+)\s+(?:available\s+)?units?", badge_text)
+            unit_match = self._PATTERN_UNIT_COUNT.search(badge_text)
             if unit_match:
                 return int(unit_match.group(1))
         return 1
@@ -135,7 +139,7 @@ class ZillowCardParser:
         if "studio" in bed_info_lower:
             return f"{self.main_link}#bedrooms-0"
         if "bd" in bed_info_lower:
-            bed_num = re.search(r"\d+", bed_info)
+            bed_num = self._PATTERN_BED_NUM.search(bed_info)
             if bed_num:
                 return f"{self.main_link}#bedrooms-{bed_num.group()}"
 
