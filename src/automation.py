@@ -216,7 +216,7 @@ async def scrape_all_pages(page: Page) -> list[PropertyListing]:
 
     page_number = 1
     has_next_page = True
-    with tqdm(desc="Scraping pages", unit="page") as pbar:
+    with tqdm(desc="Scraping pages", unit="page", initial=1) as pbar:
         while has_next_page:
             logger.debug("Scraping page %s", page_number)
 
