@@ -216,8 +216,11 @@ async def scrape_all_pages(page: Page) -> list[PropertyListing]:
 
     page_number = 1
     has_next_page = True
-    with tqdm(desc="Scraping pages", unit="page", initial=1) as pbar:
+    with tqdm(desc="Scraping pages", bar_format="{desc}: page {n} [{elapsed}, {rate_fmt}]{postfix}") as pbar:
         while has_next_page:
+            pbar.update(1)
+            pbar.set_postfix({"listings": len(all_listings)})
+
             logger.debug("Scraping page %s", page_number)
 
             page_listings = await scrape_single_page(page)
@@ -229,8 +232,6 @@ async def scrape_all_pages(page: Page) -> list[PropertyListing]:
                 logger.debug("No more pages to process or next button is disabled")
 
             page_number += 1
-            pbar.update(1)
-            pbar.set_postfix({"listings": len(all_listings)})
 
     logger.debug("Total listings scraped: %s from %s page(s)", len(all_listings), page_number)
     return all_listings
