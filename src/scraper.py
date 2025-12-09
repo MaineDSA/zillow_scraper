@@ -4,6 +4,7 @@ import logging
 import re
 from dataclasses import dataclass
 from random import SystemRandom
+from statistics import median
 from typing import ClassVar, cast
 
 from bs4 import BeautifulSoup, NavigableString, Tag
@@ -20,6 +21,7 @@ class PropertyListing:
 
     address: str
     price: str
+    median_price: str
     link: str
 
 
@@ -152,7 +154,11 @@ class ZillowCardParser:
         units_count = self._get_units_count()
         address = self.address + (f" ({units_count} units available)" if units_count > 1 else "")
 
-        return [PropertyListing(address, price_text, self.main_link)]
+        # Calculate median price (same as regular price for single values)
+        numeric_price = self._extract_numeric_price(price_text)
+        median_price = str(numeric_price) if numeric_price else price_text
+
+        return [PropertyListing(address, price_text, median_price, self.main_link)]
 
     def _get_inventory_listings(self) -> list[PropertyListing]:
         """Extract multiple prices from inventory section."""
@@ -177,15 +183,27 @@ class ZillowCardParser:
         if units_count > 1 and len(price_bed_pairs) > 1:
             prices = [price for price, _ in price_bed_pairs]
             price_range = cast("str", self._format_price_range(prices))
+
+            # Calculate median of the range
+            price_values = [self._extract_numeric_price(p) for p in prices]
+            price_values = [p for p in price_values if p is not None and p > 0]
+            price_values_filtered = [p for p in price_values if p is not None and p > 0]  # mypy being weird
+            median_value = str(int(median(price_values_filtered))) if price_values_filtered else price_range
+
             address = f"{self.address} ({units_count} units available)"
-            return [PropertyListing(address, price_range, self.main_link)]
+            return [PropertyListing(address, price_range, median_value, self.main_link)]
 
         # Create individual listings
         listings = []
         for price, bed_info in price_bed_pairs:
             address = self.address + (f" ({bed_info})" if bed_info else "")
             specific_link = self._create_specific_link(bed_info)
-            listings.append(PropertyListing(address, price, specific_link))
+
+            # For individual listings, median is same as price
+            numeric_price = self._extract_numeric_price(price)
+            median_price = str(numeric_price) if numeric_price else price
+
+            listings.append(PropertyListing(address, price, median_price, specific_link))
 
         return listings
 

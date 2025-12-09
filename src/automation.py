@@ -4,7 +4,7 @@ import logging
 from random import SystemRandom
 
 from bs4 import BeautifulSoup
-from patchright.async_api import Browser, BrowserContext, Page, ViewportSize, async_playwright
+from patchright.async_api import Browser, BrowserContext, Page, Playwright, ViewportSize, async_playwright
 from tqdm import tqdm
 
 from src.constants import (
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
 
 
-async def create_browser_context() -> tuple[Browser, BrowserContext]:
+async def create_browser_context() -> tuple[Playwright, Browser, BrowserContext]:
     """Create and configure browser with context."""
     p = await async_playwright().start()
     browser = await p.chromium.launch(headless=False)
@@ -32,7 +32,7 @@ async def create_browser_context() -> tuple[Browser, BrowserContext]:
         user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
         viewport=ViewportSize(width=VIEWPORT_WIDTH, height=VIEWPORT_HEIGHT),
     )
-    return browser, context
+    return p, browser, context
 
 
 # Browser Automation - Scrolling and Navigation
