@@ -34,8 +34,9 @@ The responses can be stored in a connected Google Spreadsheet for easy tracking.
 1. Create a folder called `env` in the project directory with one or more files each containing the following contents:
 
     ```bash
-    FORM_URL=<YOUR GOOGLE FORMS URL>
     SEARCH_URL=<URL OF THE ZILLOW CLONE TO SCRAPE>
+    SHEET_URL=<YOUR GOOGLE SHEETS DOC URL>
+    SHEET_NAME=<NAME OF SHEET IN GOOGLE SHEETS DOC TO ADD TO (OPTIONAL)>
     ```
 1. Run the script:
 
