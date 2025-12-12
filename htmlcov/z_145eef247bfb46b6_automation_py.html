@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_145eef247bfb46b6_config_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.12.0">coverage.py v7.12.0</a>,
-            created at 2025-12-09 01:06 +0000
+            created at 2025-12-12 02:01 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -88,7 +88,7 @@
     <p class="run"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="key">from</span> <span class="nam">random</span> <span class="key">import</span> <span class="nam">SystemRandom</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="key">from</span> <span class="nam">bs4</span> <span class="key">import</span> <span class="nam">BeautifulSoup</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="key">from</span> <span class="nam">patchright</span><span class="op">.</span><span class="nam">async_api</span> <span class="key">import</span> <span class="nam">Browser</span><span class="op">,</span> <span class="nam">BrowserContext</span><span class="op">,</span> <span class="nam">Page</span><span class="op">,</span> <span class="nam">ViewportSize</span><span class="op">,</span> <span class="nam">async_playwright</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="key">from</span> <span class="nam">patchright</span><span class="op">.</span><span class="nam">async_api</span> <span class="key">import</span> <span class="nam">Browser</span><span class="op">,</span> <span class="nam">BrowserContext</span><span class="op">,</span> <span class="nam">Page</span><span class="op">,</span> <span class="nam">Playwright</span><span class="op">,</span> <span class="nam">ViewportSize</span><span class="op">,</span> <span class="nam">async_playwright</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="key">from</span> <span class="nam">tqdm</span> <span class="key">import</span> <span class="nam">tqdm</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">constants</span> <span class="key">import</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
@@ -108,7 +108,7 @@
     <p class="run"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t"><span class="nam">cryptogen</span> <span class="op">=</span> <span class="nam">SystemRandom</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t"><span class="key">async</span> <span class="key">def</span> <span class="nam">create_browser_context</span><span class="op">(</span><span class="op">)</span> <span class="op">-></span> <span class="nam">tuple</span><span class="op">[</span><span class="nam">Browser</span><span class="op">,</span> <span class="nam">BrowserContext</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t"><span class="key">async</span> <span class="key">def</span> <span class="nam">create_browser_context</span><span class="op">(</span><span class="op">)</span> <span class="op">-></span> <span class="nam">tuple</span><span class="op">[</span><span class="nam">Playwright</span><span class="op">,</span> <span class="nam">Browser</span><span class="op">,</span> <span class="nam">BrowserContext</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">    <span class="str">"""Create and configure browser with context."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">    <span class="nam">p</span> <span class="op">=</span> <span class="key">await</span> <span class="nam">async_playwright</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">start</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">    <span class="nam">browser</span> <span class="op">=</span> <span class="key">await</span> <span class="nam">p</span><span class="op">.</span><span class="nam">chromium</span><span class="op">.</span><span class="nam">launch</span><span class="op">(</span><span class="nam">headless</span><span class="op">=</span><span class="key">False</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -116,7 +116,7 @@
     <p class="mis mis2 show_mis"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">        <span class="nam">user_agent</span><span class="op">=</span><span class="str">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">        <span class="nam">viewport</span><span class="op">=</span><span class="nam">ViewportSize</span><span class="op">(</span><span class="nam">width</span><span class="op">=</span><span class="nam">VIEWPORT_WIDTH</span><span class="op">,</span> <span class="nam">height</span><span class="op">=</span><span class="nam">VIEWPORT_HEIGHT</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">    <span class="key">return</span> <span class="nam">browser</span><span class="op">,</span> <span class="nam">context</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">    <span class="key">return</span> <span class="nam">p</span><span class="op">,</span> <span class="nam">browser</span><span class="op">,</span> <span class="nam">context</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t"><span class="com"># Browser Automation - Scrolling and Navigation</span>&nbsp;</span><span class="r"></span></p>
@@ -354,7 +354,7 @@
             <a class="nav" href="z_145eef247bfb46b6_config_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.12.0">coverage.py v7.12.0</a>,
-            created at 2025-12-09 01:06 +0000
+            created at 2025-12-12 02:01 +0000
         </p>
     </div>
 </footer>

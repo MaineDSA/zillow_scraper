@@ -2,16 +2,17 @@
 
 [Full report](https://htmlpreview.github.io/?https://github.com/MaineDSA/zillow_scraper/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-| Name                    |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
-|------------------------ | -------: | -------: | -------: | -------: | ------: | --------: |
-| src/\_\_init\_\_.py     |        0 |        0 |        0 |        0 |    100% |           |
-| src/automation.py       |      114 |       77 |       12 |        0 |     33% |29-35, 43-44, 49-53, 66, 80-88, 93-101, 106-141, 150-177, 182-196, 215-237 |
-| src/config.py           |       29 |        1 |        6 |        1 |     94% |        29 |
-| src/constants.py        |       17 |        0 |        0 |        0 |    100% |           |
-| src/form\_submission.py |       33 |       11 |        0 |        0 |     67% |30-32, 43-52 |
-| src/main.py             |       19 |       11 |        0 |        0 |     42% |     16-40 |
-| src/scraper.py          |      155 |        0 |       56 |        0 |    100% |           |
-|               **TOTAL** |  **367** |  **100** |   **74** |    **1** | **75%** |           |
+| Name                      |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
+|-------------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
+| src/\_\_init\_\_.py       |        0 |        0 |        0 |        0 |    100% |           |
+| src/automation.py         |      114 |       77 |       12 |        0 |     33% |29-35, 43-44, 49-53, 66, 80-88, 93-101, 106-141, 150-177, 182-196, 215-237 |
+| src/config.py             |       48 |        3 |       10 |        1 |     93% | 42, 82-84 |
+| src/constants.py          |       17 |        0 |        0 |        0 |    100% |           |
+| src/form\_submission.py   |       33 |       11 |        0 |        0 |     67% |30-32, 43-52 |
+| src/main.py               |       35 |       23 |        0 |        0 |     34% |18-31, 36-56, 63-64 |
+| src/scraper.py            |      166 |        0 |       56 |        0 |    100% |           |
+| src/sheets\_submission.py |       41 |       26 |        4 |        0 |     33% |26-32, 45-75 |
+|                 **TOTAL** |  **454** |  **140** |   **82** |    **1** | **71%** |           |
 
 
 ## Setup coverage badge
