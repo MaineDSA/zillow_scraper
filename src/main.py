@@ -6,48 +6,62 @@ import logging
 from src.automation import create_browser_context, deduplicate_listings, scrape_all_pages, sort_by_newest
 from src.config import Config, SubmissionType, load_configs
 from src.form_submission import submit_listings
+from src.scraper import PropertyListing
 from src.sheets_submission import SheetsSubmitter
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-async def scrape_and_submit(config: Config) -> None:
-    """Launch browser, scrape Zillow listings, and submit to Google Form or Sheets."""
+async def scrape_listings(config: Config) -> list[PropertyListing]:
+    """Scrape and deduplicate listings from Zillow."""
     playwright, browser, context = await create_browser_context()
     page = await context.new_page()
 
     try:
-        # Phase 1: Scrape all listings
-        logger.info("Scraping all listings...")
+        logger.info("Scraping all listings from %s...", config.search_url)
         await page.goto(config.search_url)
         await sort_by_newest(page)
         all_listings = await scrape_all_pages(page)
 
-        # Phase 2: Deduplicate
         logger.info("Deduplicating %s listings...", len(all_listings))
-        unique_listings = deduplicate_listings(all_listings)
-
-        # Phase 3: Submit based on configuration
-        if not unique_listings:
-            logger.warning("No listings to submit")
-        elif config.submission_type == SubmissionType.SHEET:
-            logger.info("Submitting %s unique listings to Google Sheets...", len(unique_listings))
-            submitter = SheetsSubmitter()
-            submitter.submit_listings(
-                listings=unique_listings,
-                sheet_url=config.sheet_url,  # type: ignore
-                worksheet_name=config.sheet_name,
-            )
-        elif config.submission_type == SubmissionType.FORM:
-            logger.info("Submitting %s unique listings to Google Form...", len(unique_listings))
-            await submit_listings(page, config.form_url, unique_listings)  # type: ignore
-        else:
-            logger.warning("No submission destination configured, skipping submission")
-
+        return deduplicate_listings(all_listings)
     finally:
         await browser.close()
         await playwright.stop()
+
+
+async def submit_listings_to_destination(config: Config, listings: list[PropertyListing]) -> None:
+    """Submit listings based on configuration."""
+    if not listings:
+        logger.warning("No listings to submit")
+        return
+
+    if config.submission_type == SubmissionType.SHEET and isinstance(config.sheet_url, str):
+        logger.info("Submitting %s listings to Google Sheets...", len(listings))
+        submitter = SheetsSubmitter()
+        submitter.submit_listings(
+            listings=listings,
+            sheet_url=config.sheet_url,
+            worksheet_name=config.sheet_name,
+        )
+    elif config.submission_type == SubmissionType.FORM and isinstance(config.form_url, str):
+        logger.info("Submitting %s listings to Google Form...", len(listings))
+        playwright, browser, context = await create_browser_context()
+        page = await context.new_page()
+        try:
+            await submit_listings(page, config.form_url, listings)
+        finally:
+            await browser.close()
+            await playwright.stop()
+    else:
+        logger.warning("No submission destination configured")
+
+
+async def scrape_and_submit(config: Config) -> None:
+    """Orchestrate scraping and submission workflow."""
+    listings = await scrape_listings(config)
+    await submit_listings_to_destination(config, listings)
 
 
 def main() -> None:
