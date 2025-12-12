@@ -11,8 +11,8 @@
 | src/form\_submission.py   |       33 |       11 |        0 |        0 |     67% |30-32, 43-52 |
 | src/main.py               |       35 |       23 |        0 |        0 |     34% |18-31, 36-56, 63-64 |
 | src/scraper.py            |      166 |        0 |       56 |        0 |    100% |           |
-| src/sheets\_submission.py |       41 |        9 |        4 |        1 |     78% |     62-75 |
-|                 **TOTAL** |  **454** |  **123** |   **82** |    **2** | **75%** |           |
+| src/sheets\_submission.py |       41 |        6 |        4 |        0 |     87% |     67-75 |
+|                 **TOTAL** |  **454** |  **120** |   **82** |    **1** | **76%** |           |
 
 
 ## Setup coverage badge
