@@ -29,8 +29,8 @@ def test_submit_empty_listings(caplog: LogCaptureFixture) -> None:
 
 @patch("src.sheets_submission.gspread")
 @patch("src.sheets_submission.Credentials")
-def test_row_formatting(mock_creds: MagicMock, mock_gspread: MagicMock) -> None:  # noqa: ARG001
-    """Test that listings are formatted into correct row structure."""
+def test_row_formatting_appended(mock_creds: MagicMock, mock_gspread: MagicMock) -> None:  # noqa: ARG001
+    """Test that listings are formatted into correct row structure when appending sheet contents."""
     mock_client = MagicMock()
     mock_gspread.authorize.return_value = mock_client
 
@@ -46,4 +46,34 @@ def test_row_formatting(mock_creds: MagicMock, mock_gspread: MagicMock) -> None:
 
     rows = worksheet.append_rows.call_args[0][0]
     assert len(rows) == 1
-    assert len(rows[0]) == 6  # timestamp, date, address, price, median_price, link
+    assert rows[0][2] == listing.address
+    assert rows[0][3] == listing.price
+    assert rows[0][4] == listing.median_price
+    assert rows[0][5] == listing.link
+
+
+@patch("src.sheets_submission.gspread")
+@patch("src.sheets_submission.Credentials")
+def test_row_formatting_cleared(mock_creds: MagicMock, mock_gspread: MagicMock) -> None:  # noqa: ARG001
+    """Test that listings are formatted into correct row structure when replacing sheet contents."""
+    mock_client = MagicMock()
+    mock_gspread.authorize.return_value = mock_client
+
+    listing = PropertyListing(address="123 Main St", price="$2000", median_price="2000", link="https://example.com")
+
+    with patch("src.sheets_submission.Path.exists", return_value=True):
+        submitter = SheetsSubmitter()
+
+    submitter.submit_listings(listings=[listing], sheet_url="https://example.com", worksheet_name="Sheet1", append=False)
+
+    worksheet = mock_client.open_by_url().worksheet()
+    worksheet.clear.assert_called_once()
+    worksheet.update.assert_called_once()
+
+    rows = worksheet.update.call_args[0][0]
+    assert len(rows) == 2
+    assert rows[0] == ["Timestamp", "Date", "Address", "Starting Price / Month", "Starting Price / Month (Median of Ranges)", "Link"]
+    assert rows[1][2] == listing.address
+    assert rows[1][3] == listing.price
+    assert rows[1][4] == listing.median_price
+    assert rows[1][5] == listing.link
