@@ -25,9 +25,9 @@ async def test_scrape_single_page_success(zillow_search_page_html: str) -> None:
 def test_deduplicate_no_duplicates() -> None:
     """Test deduplication when all listings are unique."""
     listings = [
-        PropertyListing("123 Main St", "$1,000", "https://zillow.com/1"),
-        PropertyListing("456 Oak Ave", "$1,200", "https://zillow.com/2"),
-        PropertyListing("789 Pine Rd", "$1,500", "https://zillow.com/3"),
+        PropertyListing("123 Main St", "$1,000", "1000", "https://zillow.com/1"),
+        PropertyListing("456 Oak Ave", "$1,200", "1200", "https://zillow.com/2"),
+        PropertyListing("789 Pine Rd", "$1,500", "1500", "https://zillow.com/3"),
     ]
 
     result = deduplicate_listings(listings)
@@ -38,9 +38,9 @@ def test_deduplicate_no_duplicates() -> None:
 
 def test_deduplicate_exact_duplicates() -> None:
     """Test deduplication when there are exact duplicate listings."""
-    listing1 = PropertyListing("123 Main St", "$1,000", "https://zillow.com/1")
-    listing2 = PropertyListing("456 Oak Ave", "$1,200", "https://zillow.com/2")
-    listing1_dup = PropertyListing("123 Main St", "$1,000", "https://zillow.com/1")
+    listing1 = PropertyListing("123 Main St", "$1,000", "1000", "https://zillow.com/1")
+    listing2 = PropertyListing("456 Oak Ave", "$1,200", "1200", "https://zillow.com/2")
+    listing1_dup = PropertyListing("123 Main St", "$1,000", "1000", "https://zillow.com/1")
 
     listings = [listing1, listing2, listing1_dup]
 
@@ -52,8 +52,8 @@ def test_deduplicate_exact_duplicates() -> None:
 
 def test_deduplicate_multiple_duplicates() -> None:
     """Test deduplication when there are multiple sets of duplicates."""
-    listing1 = PropertyListing("123 Main St", "$1,000", "https://zillow.com/1")
-    listing2 = PropertyListing("456 Oak Ave", "$1,200", "https://zillow.com/2")
+    listing1 = PropertyListing("123 Main St", "$1,000", "1000", "https://zillow.com/1")
+    listing2 = PropertyListing("456 Oak Ave", "$1,200", "1200", "https://zillow.com/2")
 
     listings = [listing1, listing2, listing1, listing2, listing1]
 
@@ -65,8 +65,8 @@ def test_deduplicate_multiple_duplicates() -> None:
 
 def test_deduplicate_same_address_different_price() -> None:
     """Test that same address with different price is not considered duplicate."""
-    listing1 = PropertyListing("123 Main St", "$1,000", "https://zillow.com/1")
-    listing2 = PropertyListing("123 Main St", "$1,200", "https://zillow.com/1")
+    listing1 = PropertyListing("123 Main St", "$1,000", "1000", "https://zillow.com/1")
+    listing2 = PropertyListing("123 Main St", "$1,200", "1200", "https://zillow.com/1")
 
     listings = [listing1, listing2]
 
@@ -78,8 +78,8 @@ def test_deduplicate_same_address_different_price() -> None:
 
 def test_deduplicate_same_address_different_link() -> None:
     """Test that same address with different link is not considered duplicate."""
-    listing1 = PropertyListing("123 Main St", "$1,000", "https://zillow.com/1")
-    listing2 = PropertyListing("123 Main St", "$1,000", "https://zillow.com/2")
+    listing1 = PropertyListing("123 Main St", "$1,000", "1000", "https://zillow.com/1")
+    listing2 = PropertyListing("123 Main St", "$1,000", "1000", "https://zillow.com/2")
 
     listings = [listing1, listing2]
 

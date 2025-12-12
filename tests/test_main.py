@@ -6,15 +6,26 @@ from unittest.mock import patch
 
 from _pytest.logging import LogCaptureFixture
 
-from src.config import ScraperConfig
+from src.config import Config, SubmissionType
 from src.main import main
 
 
 def test_main_with_mocked_configs(caplog: LogCaptureFixture) -> None:
-    """Test that main() works with a single config."""
+    """Test that main() works with multiple configs."""
     mock_config = [
-        ScraperConfig(form_url="https://form.com", search_url="https://zillow.com", config_name="config1.env"),
-        ScraperConfig(form_url="https://form.com", search_url="https://zillow.com", config_name="config2.env"),
+        Config(
+            config_name="config1.env",
+            search_url="https://zillow.com",
+            submission_type=SubmissionType.FORM,
+            form_url="https://form.com",
+        ),
+        Config(
+            config_name="config2.env",
+            search_url="https://zillow.com",
+            submission_type=SubmissionType.SHEET,
+            sheet_url="https://sheets.google.com/spreadsheet",
+            sheet_name="Sheet1",
+        ),
     ]
 
     def mock_run_impl(coro: Coroutine) -> None:

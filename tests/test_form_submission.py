@@ -50,7 +50,7 @@ async def test_submit_listings_with_empty_list(caplog: LogCaptureFixture, empty_
 @pytest.mark.asyncio
 async def test_submit_single_listing_field_mapping(mock_page: AsyncMock) -> None:
     """Test that form fields are filled in the correct order with correct selectors."""
-    listing = PropertyListing(address="742 Evergreen Terrace", price="$2,500/mo", link="https://zillow.com/listing/999")
+    listing = PropertyListing(address="742 Evergreen Terrace", price="$2,500/mo", median_price="2500", link="https://zillow.com/listing/999")
     form_url = "https://example.com/form"
 
     with patch("src.form_submission.cryptogen.randint", return_value=250):

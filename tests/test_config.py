@@ -7,135 +7,121 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.monkeypatch import MonkeyPatch
 
-from src.config import ScraperConfig, load_configs
+from src.config import SubmissionType, load_configs
 from src.constants import CLONE_URL
 
 
-class TestScraperConfig:
-    """Tests for ScraperConfig dataclass."""
+@pytest.fixture
+def temp_env_dir(tmp_path: Path, monkeypatch: MonkeyPatch) -> Path:
+    """Create temporary env directory and point config module to it."""
+    env_dir = tmp_path / "env"
+    env_dir.mkdir()
 
-    def test_scraper_config(self) -> None:
-        """Test creating ScraperConfig with form URL."""
-        config = ScraperConfig(
-            form_url="https://forms.google.com/test",
-            search_url="https://zillow.com/search",
-            config_name="test.env",
-        )
-        assert config.form_url == "https://forms.google.com/test"
-        assert config.search_url == "https://zillow.com/search"
-        assert config.config_name == "test.env"
+    original_path = Path
+
+    def mock_path(path_str: str) -> Path:
+        if path_str == "env/":
+            return env_dir
+        return original_path(path_str)
+
+    monkeypatch.setattr("src.config.Path", mock_path)
+    return env_dir
 
 
 class TestLoadConfigs:
     """Tests for load_configs function."""
 
-    @pytest.fixture
-    def temp_env_dir(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> Path:
-        """Create temporary env directory and point config module to it."""
-        env_dir = tmp_path / "env"
-        env_dir.mkdir()
-
-        original_path = Path
-
-        def mock_path(path_str: str) -> Path:
-            if path_str == "env/":
-                return env_dir
-            return original_path(path_str)
-
-        monkeypatch.setattr("config.Path", mock_path)
-        return env_dir
-
-    def test_load_single_valid_config(self, temp_env_dir: Path) -> None:
-        """Test loading a single valid configuration file."""
-        config_file = temp_env_dir / "config1.env"
-        config_file.write_text("FORM_URL=https://forms.google.com/test\nSEARCH_URL=https://zillow.com/search\n")
+    @pytest.mark.parametrize(
+        ("env_content", "expected_type", "expected_attrs"),
+        [
+            (
+                "CONFIG_NAME=TestConfig\nFORM_URL=https://forms.google.com/test\nSEARCH_URL=https://zillow.com/search\n",
+                SubmissionType.FORM,
+                {"config_name": "TestConfig", "form_url": "https://forms.google.com/test", "search_url": "https://zillow.com/search"},
+            ),
+            (
+                "SHEET_URL=https://docs.google.com/spreadsheets/test\nSEARCH_URL=https://zillow.com/search\nSHEET_NAME=MySheet\n",
+                SubmissionType.SHEET,
+                {"sheet_url": "https://docs.google.com/spreadsheets/test", "search_url": "https://zillow.com/search", "sheet_name": "MySheet"},
+            ),
+            ("SEARCH_URL=https://zillow.com/search\n", SubmissionType.NONE, {"form_url": None, "sheet_url": None, "search_url": "https://zillow.com/search"}),
+        ],
+    )
+    def test_load_single_config(self, temp_env_dir: Path, env_content: str, expected_type: SubmissionType, expected_attrs: dict) -> None:
+        """Test loading various single configuration files."""
+        config_file = temp_env_dir / "config.env"
+        config_file.write_text(env_content)
 
         configs = load_configs(temp_env_dir)
 
         assert len(configs) == 1
-        assert configs[0].form_url == "https://forms.google.com/test"
-        assert configs[0].search_url == "https://zillow.com/search"
-        assert configs[0].config_name == "config1.env"
+        assert configs[0].submission_type == expected_type
 
-    def test_load_multiple_valid_configs(self, temp_env_dir: Path) -> None:
+        for attr, expected_value in expected_attrs.items():
+            assert getattr(configs[0], attr) == expected_value
+
+    def test_config_name_defaults_to_filename(self, temp_env_dir: Path) -> None:
+        """Test that CONFIG_NAME defaults to filename stem."""
+        config_file = temp_env_dir / "myconfig.env"
+        config_file.write_text("SEARCH_URL=https://zillow.com/search\n")
+
+        configs = load_configs(temp_env_dir)
+        assert configs[0].config_name == "myconfig"
+
+    def test_load_multiple_configs(self, temp_env_dir: Path) -> None:
         """Test loading multiple valid configuration files."""
-        config_file1 = temp_env_dir / "config1.env"
-        config_file1.write_text("FORM_URL=https://forms.google.com/test1\nSEARCH_URL=https://zillow.com/search1\n")
-
-        config_file2 = temp_env_dir / "config2.env"
-        config_file2.write_text("FORM_URL=https://forms.google.com/test2\nSEARCH_URL=https://zillow.com/search2\n")
+        (temp_env_dir / "config1.env").write_text("FORM_URL=https://forms.google.com/test1\nSEARCH_URL=https://zillow.com/search1\n")
+        (temp_env_dir / "config2.env").write_text("SHEET_URL=https://docs.google.com/spreadsheets/test2\nSEARCH_URL=https://zillow.com/search2\n")
 
         configs = load_configs(temp_env_dir)
 
         assert len(configs) == 2
-        config_names = {c.config_name for c in configs}
-        assert config_names == {"config1.env", "config2.env"}
+        assert {c.config_name for c in configs} == {"config1", "config2"}
+        assert {c.submission_type for c in configs} == {SubmissionType.FORM, SubmissionType.SHEET}
 
-        # Find each config and verify
-        config1 = next(c for c in configs if c.config_name == "config1.env")
-        config2 = next(c for c in configs if c.config_name == "config2.env")
-
-        assert config1.form_url == "https://forms.google.com/test1"
-        assert config1.search_url == "https://zillow.com/search1"
-        assert config2.form_url == "https://forms.google.com/test2"
-        assert config2.search_url == "https://zillow.com/search2"
-
-    def test_load_config_without_form_url(self, temp_env_dir: Path) -> None:
-        """Test loading config when FORM_URL is not provided."""
+    def test_sheet_prioritized_over_form(self, temp_env_dir: Path) -> None:
+        """Test that SHEET_URL takes priority over FORM_URL when both are present."""
         config_file = temp_env_dir / "config.env"
-        config_file.write_text("SEARCH_URL=https://zillow.com/search\n")
+        config_file.write_text(
+            "FORM_URL=https://forms.google.com/test\nSHEET_URL=https://docs.google.com/spreadsheets/test\nSEARCH_URL=https://zillow.com/search\n"
+        )
 
         configs = load_configs(temp_env_dir)
 
-        assert len(configs) == 1
-        assert configs[0].form_url is None
-        assert configs[0].search_url == "https://zillow.com/search"
+        assert configs[0].submission_type == SubmissionType.SHEET
+        assert configs[0].sheet_url == "https://docs.google.com/spreadsheets/test"
 
-    def test_load_config_uses_default_search_url(self, temp_env_dir: Path) -> None:
-        """Test loading config uses default CLONE_URL when SEARCH_URL not provided."""
+    def test_default_search_url(self, temp_env_dir: Path) -> None:
+        """Test that SEARCH_URL defaults to CLONE_URL when not provided."""
         config_file = temp_env_dir / "config.env"
         config_file.write_text("FORM_URL=https://forms.google.com/test\n")
 
         configs = load_configs(temp_env_dir)
-
-        assert len(configs) == 1
         assert configs[0].search_url == CLONE_URL
 
-    def test_load_config_skips_empty_search_url(self, caplog: LogCaptureFixture, temp_env_dir: Path) -> None:
-        """Test that configs with empty SEARCH_URL are skipped."""
+    def test_default_sheet_name(self, temp_env_dir: Path) -> None:
+        """Test that SHEET_NAME defaults to 'Sheet1' when not provided."""
         config_file = temp_env_dir / "config.env"
-        config_file.write_text("FORM_URL=https://forms.google.com/test\nSEARCH_URL=\n")
-
-        with caplog.at_level(logging.ERROR):
-            with pytest.raises(SystemExit) as exc_info:
-                load_configs(temp_env_dir)
-            assert "No valid configurations found" in caplog.text
-
-        assert exc_info.value.code == 1
-
-    def test_load_configs_mixed_valid_invalid(self, temp_env_dir: Path) -> None:
-        """Test loading when some configs are valid and some are invalid."""
-        # Valid config
-        valid_file = temp_env_dir / "valid.env"
-        valid_file.write_text("SEARCH_URL=https://zillow.com/search\n")
-
-        # Invalid config (empty SEARCH_URL)
-        invalid_file = temp_env_dir / "invalid.env"
-        invalid_file.write_text("SEARCH_URL=\n")
+        config_file.write_text("SHEET_URL=https://docs.google.com/spreadsheets/test\nSEARCH_URL=https://zillow.com/search\n")
 
         configs = load_configs(temp_env_dir)
+        assert configs[0].sheet_name == "Sheet1"
 
-        # Should only load the valid config
+    def test_missing_search_url_skips_config(self, caplog: LogCaptureFixture, temp_env_dir: Path) -> None:
+        """Test that configs with empty SEARCH_URL are skipped."""
+        (temp_env_dir / "valid.env").write_text("SEARCH_URL=https://zillow.com/search\n")
+        (temp_env_dir / "invalid.env").write_text("SEARCH_URL=\n")
+
+        with caplog.at_level(logging.ERROR):
+            configs = load_configs(temp_env_dir)
+            assert "Missing SEARCH_URL" in caplog.text
+
         assert len(configs) == 1
-        assert configs[0].config_name == "valid.env"
+        assert configs[0].config_name == "valid"
 
-    def test_load_configs_all_invalid_exits(self, caplog: LogCaptureFixture, temp_env_dir: Path) -> None:
-        """Test that having only invalid configs causes system exit."""
-        # Config with no SEARCH_URL and no default used
-        invalid_file = temp_env_dir / "invalid.env"
-        invalid_file.write_text("SEARCH_URL=\n")
-        sub_dir = temp_env_dir / "misc"
-        sub_dir.mkdir()
+    def test_no_valid_configs_exits(self, caplog: LogCaptureFixture, temp_env_dir: Path) -> None:
+        """Test that having no valid configs causes system exit."""
+        (temp_env_dir / "invalid.env").write_text("SEARCH_URL=\n")
 
         with caplog.at_level(logging.ERROR):
             with pytest.raises(SystemExit) as exc_info:
@@ -144,10 +130,9 @@ class TestLoadConfigs:
 
         assert exc_info.value.code == 1
 
-    def test_load_configs_missing_folder(self, caplog: LogCaptureFixture) -> None:
-        """Test that having only invalid configs causes system exit."""
-        # Config with no SEARCH_URL and no default used
-        invalid_path = Path("env") / "invalid.env"
+    def test_missing_env_directory_exits(self, caplog: LogCaptureFixture) -> None:
+        """Test that missing env directory causes system exit."""
+        invalid_path = Path("nonexistent_env_directory")
 
         with caplog.at_level(logging.ERROR):
             with pytest.raises(SystemExit) as exc_info:
@@ -155,3 +140,14 @@ class TestLoadConfigs:
             assert f"{invalid_path!s} directory not found" in caplog.text
 
         assert exc_info.value.code == 1
+
+    def test_ignores_subdirectories(self, temp_env_dir: Path) -> None:
+        """Test that subdirectories are ignored during config loading."""
+        (temp_env_dir / "config.env").write_text("SEARCH_URL=https://zillow.com/search\n")
+
+        subdir = temp_env_dir / "subdir"
+        subdir.mkdir()
+        (subdir / "config_subdir.env").write_text("SEARCH_URL=https://zillow.com/search\n")
+
+        configs = load_configs(temp_env_dir)
+        assert len(configs) == 1
