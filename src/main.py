@@ -9,7 +9,7 @@ from src.form_submission import submit_listings
 from src.scraper import PropertyListing
 from src.sheets_submission import SheetsSubmitter
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:zillow_scraper:%(name)s:%(message)s")
 logger = logging.getLogger(__name__)
 
 
