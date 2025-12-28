@@ -43,7 +43,7 @@ This Python script scrapes apartment listings from a Zillow clone site and optio
 1. Run the script:
 
     ```shell
-    python -m src.main
+    zillow_scraper
     ```
 
 The script will open a Chrome window, scrape data from each page of the Zillow clone, and submit each entry into your form.
