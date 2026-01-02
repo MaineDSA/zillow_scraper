@@ -9,7 +9,7 @@ dependencies = [
     "gspread~=6.2.1",
     "google-auth~=2.45.0",
     "python-dotenv~=1.2.0",
-    "patchright~=1.56.0",
+    "patchright~=1.57.2",
     "tqdm~=4.67.0",
 ]
 classifiers = [
