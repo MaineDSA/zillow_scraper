@@ -19,8 +19,14 @@ async def scrape_listings(config: Config) -> list[PropertyListing]:
     page = await context.new_page()
 
     try:
-        logger.info("Scraping all listings from %s...", config.search_url)
+        logger.info("Loading search URL: %s...", config.search_url)
+
         await page.goto(config.search_url)
+        if page.get_by_text("Press & Hold"):
+            error_msg = "CAPTCHA detected, cannot continue."
+            raise BaseException(error_msg)
+
+        logger.info("Scraping all listings...")
         await sort_by_newest(page)
         all_listings = await scrape_all_pages(page)
 
