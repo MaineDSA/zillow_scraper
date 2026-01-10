@@ -1,6 +1,7 @@
 """Browser automation, configuration, and page processing."""
 
 import logging
+import tempfile
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from random import SystemRandom
@@ -28,18 +29,20 @@ cryptogen = SystemRandom()
 @asynccontextmanager
 async def create_browser_context() -> AsyncGenerator[BrowserContext, Any]:
     """Create and configure browser with Patchright's stealth mode."""
-    async with async_playwright() as p:
-        context = await p.chromium.launch_persistent_context(
-            user_data_dir="/tmp/patchright_zillow_profile",
-            channel="chrome",
-            headless=False,
-            no_viewport=True,
-        )
+    with tempfile.TemporaryDirectory(prefix="patchright_") as temp_dir:
+        async with async_playwright() as p:
+            context = await p.chromium.launch_persistent_context(
+                user_data_dir=temp_dir,
+                channel="chrome",  # CRITICAL: Use real Chrome, not Chromium
+                headless=False,  # CRITICAL: Don't use headless
+                no_viewport=True,  # CRITICAL: Use native resolution
+                # DO NOT add user_agent or extra_http_headers - Patchright handles this
+            )
 
-        try:
-            yield context
-        finally:
-            await context.close()
+            try:
+                yield context
+            finally:
+                await context.close()
 
 
 @asynccontextmanager
