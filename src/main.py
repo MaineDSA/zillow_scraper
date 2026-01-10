@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from src.automation import create_browser_context, deduplicate_listings, scrape_all_pages, sort_by_newest
+from src.automation import deduplicate_listings, get_browser_page, scrape_all_pages, sort_by_newest
 from src.config import Config, SubmissionType, load_configs
 from src.form_submission import submit_listings
 from src.scraper import PropertyListing
@@ -15,14 +15,11 @@ logger = logging.getLogger(__name__)
 
 async def scrape_listings(config: Config) -> list[PropertyListing]:
     """Scrape and deduplicate listings from Zillow."""
-    playwright, browser, context = await create_browser_context()
-    page = await context.new_page()
-
-    try:
+    async with get_browser_page() as page:
         logger.info("Loading search URL: %s...", config.search_url)
 
         await page.goto(config.search_url)
-        if page.get_by_text("Press & Hold"):
+        if await page.get_by_text("Press & Hold").count() > 0:
             error_msg = "CAPTCHA detected, cannot continue."
             raise BaseException(error_msg)
 
@@ -32,9 +29,6 @@ async def scrape_listings(config: Config) -> list[PropertyListing]:
 
         logger.info("Deduplicating %s listings...", len(all_listings))
         return deduplicate_listings(all_listings)
-    finally:
-        await browser.close()
-        await playwright.stop()
 
 
 async def submit_listings_to_destination(config: Config, listings: list[PropertyListing]) -> None:
@@ -53,13 +47,8 @@ async def submit_listings_to_destination(config: Config, listings: list[Property
         )
     elif config.submission_type == SubmissionType.FORM and isinstance(config.form_url, str):
         logger.info("Submitting %s listings to Google Form...", len(listings))
-        playwright, browser, context = await create_browser_context()
-        page = await context.new_page()
-        try:
+        async with get_browser_page() as page:
             await submit_listings(page, config.form_url, listings)
-        finally:
-            await browser.close()
-            await playwright.stop()
     else:
         logger.warning("No submission destination configured")
 

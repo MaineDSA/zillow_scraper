@@ -4,9 +4,6 @@ from typing import ClassVar
 
 CLONE_URL = "https://appbrewery.github.io/Zillow-Clone/"
 
-VIEWPORT_WIDTH = 1280
-VIEWPORT_HEIGHT = 720
-
 MIN_WAIT_TIME = 1000
 MAX_WAIT_TIME = 3000
 MIN_SCROLL_DOWN = 300
