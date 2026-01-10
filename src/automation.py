@@ -1,10 +1,14 @@
 """Browser automation, configuration, and page processing."""
 
 import logging
+import tempfile
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from random import SystemRandom
+from typing import Any
 
 from bs4 import BeautifulSoup
-from patchright.async_api import Browser, BrowserContext, Page, Playwright, ViewportSize, async_playwright
+from patchright.async_api import BrowserContext, Page, async_playwright
 from tqdm import tqdm
 
 from src.constants import (
@@ -15,8 +19,6 @@ from src.constants import (
     MIN_SCROLL_UP,
     MIN_WAIT_TIME,
     PROBABILITY_SCROLL_UP,
-    VIEWPORT_HEIGHT,
-    VIEWPORT_WIDTH,
 )
 from src.scraper import PropertyListing, ZillowHomeFinder
 
@@ -24,15 +26,37 @@ logger = logging.getLogger(__name__)
 cryptogen = SystemRandom()
 
 
-async def create_browser_context() -> tuple[Playwright, Browser, BrowserContext]:
-    """Create and configure browser with context."""
-    p = await async_playwright().start()
-    browser = await p.chromium.launch(headless=False)
-    context = await browser.new_context(
-        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
-        viewport=ViewportSize(width=VIEWPORT_WIDTH, height=VIEWPORT_HEIGHT),
-    )
-    return p, browser, context
+@asynccontextmanager
+async def create_browser_context() -> AsyncGenerator[BrowserContext, Any]:
+    """Create and configure browser with Patchright's stealth mode."""
+    with tempfile.TemporaryDirectory(prefix="patchright_") as temp_dir:
+        async with async_playwright() as p:
+            context = await p.chromium.launch_persistent_context(
+                user_data_dir=temp_dir,
+                channel="chrome",  # CRITICAL: Use real Chrome, not Chromium
+                headless=False,  # CRITICAL: Don't use headless
+                no_viewport=True,  # CRITICAL: Use native resolution
+                # DO NOT add user_agent or extra_http_headers - Patchright handles this
+            )
+
+            try:
+                yield context
+            finally:
+                await context.close()
+
+
+@asynccontextmanager
+async def get_browser_page() -> AsyncGenerator[Page, Any]:
+    """Create a browser page ready to use."""
+    async with create_browser_context() as context:
+        # Reuse existing page if available, otherwise create new one
+        pages = context.pages
+        if pages:
+            page = pages[0]
+        else:
+            page = await context.new_page()
+
+        yield page
 
 
 # Browser Automation - Scrolling and Navigation
@@ -179,8 +203,14 @@ async def check_and_click_next_page(page: Page) -> bool:
 
 async def sort_by_newest(page: Page) -> None:
     """Sort listings by newest first."""
-    sort_button = page.locator("button[id='sort-popover']").first
+    sort_button = page.locator("button[aria-label='Sort Properties']").first
+
     if not sort_button:
+        logger.debug("Sort page styled button not found, looking for popover")
+        sort_button = page.locator("button[id='sort-popover']").first
+
+    if not sort_button:
+        logger.debug("Sort page popover button not found")
         logger.error("No sort page button found")
         return
 
