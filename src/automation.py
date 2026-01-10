@@ -33,10 +33,9 @@ async def create_browser_context() -> AsyncGenerator[BrowserContext, Any]:
         async with async_playwright() as p:
             context = await p.chromium.launch_persistent_context(
                 user_data_dir=temp_dir,
-                channel="chrome",  # CRITICAL: Use real Chrome, not Chromium
-                headless=False,  # CRITICAL: Don't use headless
-                no_viewport=True,  # CRITICAL: Use native resolution
-                # DO NOT add user_agent or extra_http_headers - Patchright handles this
+                channel="chrome",
+                headless=False,
+                no_viewport=True,
             )
 
             try:
@@ -46,17 +45,19 @@ async def create_browser_context() -> AsyncGenerator[BrowserContext, Any]:
 
 
 @asynccontextmanager
-async def get_browser_page() -> AsyncGenerator[Page, Any]:
+async def get_browser_page(context: BrowserContext, *, require_new_page: bool = False) -> AsyncGenerator[Page, Any]:
     """Create a browser page ready to use."""
-    async with create_browser_context() as context:
-        # Reuse existing page if available, otherwise create new one
-        pages = context.pages
-        if pages:
-            page = pages[0]
-        else:
-            page = await context.new_page()
+    # Reuse existing page if available, otherwise create new one
+    pages = context.pages
+    if pages and not require_new_page:
+        page = pages[0]
+    else:
+        page = await context.new_page()
 
+    try:
         yield page
+    finally:
+        await page.close()
 
 
 # Browser Automation - Scrolling and Navigation
