@@ -129,8 +129,6 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
     """Scroll through search results to trigger lazy loading."""
     await page.wait_for_selector('[class*="search-page-list-container"]', timeout=10000)
 
-    await page.wait_for_timeout(cryptogen.randint(1000, 3500))
-
     previous_count = 0
     no_change_iterations = 0
 

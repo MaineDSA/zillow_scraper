@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from random import SystemRandom
 
 from src.automation import deduplicate_listings, get_browser_page, scrape_all_pages, sort_by_newest
 from src.config import Config, SubmissionType, load_configs
@@ -11,6 +12,7 @@ from src.sheets_submission import SheetsSubmitter
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:zillow_scraper:%(name)s:%(message)s")
 logger = logging.getLogger(__name__)
+cryptogen = SystemRandom()
 
 
 async def scrape_listings(config: Config) -> list[PropertyListing]:
@@ -19,6 +21,7 @@ async def scrape_listings(config: Config) -> list[PropertyListing]:
         logger.info("Loading search URL: %s...", config.search_url)
 
         await page.goto(config.search_url)
+        await page.wait_for_timeout(cryptogen.randint(1000, 3500))
         if await page.get_by_text("Press & Hold").count() > 0:
             error_msg = "CAPTCHA detected, cannot continue."
             raise BaseException(error_msg)
