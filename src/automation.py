@@ -205,8 +205,14 @@ async def check_and_click_next_page(page: Page) -> bool:
 
 async def sort_by_newest(page: Page) -> None:
     """Sort listings by newest first."""
-    sort_button = page.locator("button[id='sort-popover']").first
+    sort_button = page.locator("button[aria-label='Sort Properties']").first
+
     if not sort_button:
+        logger.debug("Sort page styled button not found, looking for popover")
+        sort_button = page.locator("button[id='sort-popover']").first
+
+    if not sort_button:
+        logger.debug("Sort page popover button not found")
         logger.error("No sort page button found")
         return
 
