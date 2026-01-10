@@ -101,13 +101,17 @@ async def scroll_down(page: Page, amount: int) -> None:
 
 async def simulate_human_behavior(page: Page) -> None:
     """Simulate human-like mouse movements and pauses."""
-    viewport_size = page.viewport_size
-    if viewport_size:
-        x = cryptogen.randint(100, viewport_size["width"] - 100)
-        y = cryptogen.randint(100, viewport_size["height"] - 100)
-        await page.mouse.move(x, y)
-    else:
-        logger.warning("No page viewport size, cannot simulate mouse movements.")
+    window_dimensions = await page.evaluate("""
+        () => ({
+            width: window.innerWidth,
+            height: window.innerHeight
+        })
+    """)
+
+    # Move mouse to random positions within the window
+    x = cryptogen.randint(100, window_dimensions["width"] - 100)
+    y = cryptogen.randint(100, window_dimensions["height"] - 100)
+    await page.mouse.move(x, y)
 
     await page.wait_for_timeout(cryptogen.randint(MIN_WAIT_TIME, MAX_WAIT_TIME))
 
