@@ -99,17 +99,30 @@ async def scroll_down(page: Page, amount: int) -> None:
     )
 
 
+async def simulate_human_behavior(page: Page) -> None:
+    """Simulate human-like mouse movements and pauses."""
+    viewport_size = page.viewport_size
+    if viewport_size:
+        x = cryptogen.randint(100, viewport_size["width"] - 100)
+        y = cryptogen.randint(100, viewport_size["height"] - 100)
+        await page.mouse.move(x, y)
+    else:
+        logger.warning("No page viewport size, cannot simulate mouse movements.")
+
+    await page.wait_for_timeout(cryptogen.randint(MIN_WAIT_TIME, MAX_WAIT_TIME))
+
+
 async def perform_human_like_scroll(page: Page) -> None:
     """Perform a human-like scrolling action with random variations."""
     scroll_amount = cryptogen.randint(MIN_SCROLL_DOWN, MAX_SCROLL_DOWN)
     await scroll_down(page, scroll_amount)
-    await page.wait_for_timeout(cryptogen.randint(MIN_WAIT_TIME, MAX_WAIT_TIME))
+    await simulate_human_behavior(page)
 
     # Occasionally scroll back up
     if cryptogen.random() < PROBABILITY_SCROLL_UP:
         back_scroll = cryptogen.randint(MIN_SCROLL_UP, MAX_SCROLL_UP)
         await scroll_down(page, -back_scroll)
-        await page.wait_for_timeout(cryptogen.randint(MIN_WAIT_TIME, MAX_WAIT_TIME))
+        await simulate_human_behavior(page)
 
 
 async def scroll_to_top(page: Page) -> None:
@@ -122,7 +135,7 @@ async def scroll_to_top(page: Page) -> None:
             window.scrollTo(0, 0);
         }
     """)
-    await page.wait_for_timeout(cryptogen.randint(MIN_WAIT_TIME, MAX_WAIT_TIME))
+    await simulate_human_behavior(page)
 
 
 async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_change: int = 3, max_scroll_attempts: int = 50) -> None:
