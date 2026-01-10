@@ -3,7 +3,9 @@
 import asyncio
 import logging
 
-from src.automation import deduplicate_listings, get_browser_page, scrape_all_pages, simulate_human_behavior, sort_by_newest
+from patchright.async_api import BrowserContext
+
+from src.automation import create_browser_context, deduplicate_listings, get_browser_page, scrape_all_pages, simulate_human_behavior, sort_by_newest
 from src.config import Config, SubmissionType, load_configs
 from src.form_submission import submit_listings
 from src.scraper import PropertyListing
@@ -13,9 +15,9 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s:zillow_scraper:%(n
 logger = logging.getLogger(__name__)
 
 
-async def scrape_listings(config: Config) -> list[PropertyListing]:
+async def scrape_listings(context: BrowserContext, config: Config) -> list[PropertyListing]:
     """Scrape and deduplicate listings from Zillow."""
-    async with get_browser_page() as page:
+    async with get_browser_page(context) as page:
         logger.info("Loading search URL: %s...", config.search_url)
 
         await page.goto(config.search_url)
@@ -28,11 +30,11 @@ async def scrape_listings(config: Config) -> list[PropertyListing]:
         await sort_by_newest(page)
         all_listings = await scrape_all_pages(page)
 
-        logger.info("Deduplicating %s listings...", len(all_listings))
-        return deduplicate_listings(all_listings)
+    logger.info("Deduplicating %s listings...", len(all_listings))
+    return deduplicate_listings(all_listings)
 
 
-async def submit_listings_to_destination(config: Config, listings: list[PropertyListing]) -> None:
+async def submit_listings_to_destination(context: BrowserContext, config: Config, listings: list[PropertyListing]) -> None:
     """Submit listings based on configuration."""
     if not listings:
         logger.warning("No listings to submit")
@@ -48,26 +50,27 @@ async def submit_listings_to_destination(config: Config, listings: list[Property
         )
     elif config.submission_type == SubmissionType.FORM and isinstance(config.form_url, str):
         logger.info("Submitting %s listings to Google Form...", len(listings))
-        async with get_browser_page() as page:
+        async with get_browser_page(context) as page:
             await submit_listings(page, config.form_url, listings)
     else:
         logger.warning("No submission destination configured")
 
 
-async def scrape_and_submit(config: Config) -> None:
+async def scrape_and_submit(context: BrowserContext, config: Config) -> None:
     """Orchestrate scraping and submission workflow."""
-    listings = await scrape_listings(config)
-    await submit_listings_to_destination(config, listings)
+    listings = await scrape_listings(context, config)
+    await submit_listings_to_destination(context, config, listings)
 
 
-def main() -> None:
+async def main() -> None:
     """Load configurations and run scraper for each."""
     configs = load_configs()
-    for config in configs:
-        logger.info("Processing config: '%s'", config.config_name)
-        asyncio.run(scrape_and_submit(config))
-        logger.debug("Completed config: '%s'", config.config_name)
+    async with create_browser_context() as context:
+        for config in configs:
+            logger.info("Processing config: '%s'", config.config_name)
+            await scrape_and_submit(context, config)
+            logger.debug("Completed config: '%s'", config.config_name)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
