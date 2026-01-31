@@ -116,6 +116,7 @@ ignore = [
     "D203",  # incorrect-blank-line-before-class (D203)
     "D212",  # multi-line-summary-first-line (D212)
     "FIX002",  # line-contains-todo (FIX002)
+    "E501",  # line-too-long (E501)
 ]
 
 [tool.ruff.lint.per-file-ignores]
