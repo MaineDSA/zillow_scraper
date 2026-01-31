@@ -39,7 +39,7 @@ async def test_main_with_mocked_configs(caplog: LogCaptureFixture) -> None:
         mock_context.return_value.__aexit__.return_value = None
 
         # Run the actual main function
-        await main()
+        main()
 
         # Verify scrape_and_submit was called twice (once per config)
         assert mock_scrape_and_submit.call_count == 2
