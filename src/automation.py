@@ -57,6 +57,7 @@ async def get_browser_page(context: BrowserContext, *, require_new_page: bool = 
     try:
         yield page
     finally:
+        await context.new_page()
         await page.close()
 
 
