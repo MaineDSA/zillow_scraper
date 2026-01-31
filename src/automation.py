@@ -87,18 +87,19 @@ async def is_bottom_element_visible(page: Page) -> bool:
     )
 
 
-async def scroll_down(page: Page, amount: int) -> None:
+async def scroll_page(page: Page, amount: int) -> None:
     """Scroll down by the specified amount, falling back to window scroll if needed."""
-    await page.evaluate(
+    result = await page.evaluate(
         f"""
-            const searchContainer = document.querySelector('[class*="search-page-list-container"]');
-            if (searchContainer) {{
-                searchContainer.scrollTop += {amount};
-            }} else {{
-                window.scrollBy(0, {amount});
-            }}
+        (() => {{
+            const beforeScroll = window.scrollY;
+            window.scrollBy(0, {amount});
+            const afterScroll = window.scrollY;
+            return {{method: 'window', before: beforeScroll, after: afterScroll}};
+        }})()
         """
     )
+    logger.debug("Scroll result: %s", result)
 
 
 async def simulate_human_behavior(page: Page) -> None:
@@ -121,32 +122,27 @@ async def simulate_human_behavior(page: Page) -> None:
 async def perform_human_like_scroll(page: Page) -> None:
     """Perform a human-like scrolling action with random variations."""
     scroll_amount = cryptogen.randint(MIN_SCROLL_DOWN, MAX_SCROLL_DOWN)
-    await scroll_down(page, scroll_amount)
+    await scroll_page(page, scroll_amount)
     await simulate_human_behavior(page)
 
     # Occasionally scroll back up
     if cryptogen.random() < PROBABILITY_SCROLL_UP:
         back_scroll = cryptogen.randint(MIN_SCROLL_UP, MAX_SCROLL_UP)
-        await scroll_down(page, -back_scroll)
+        await scroll_page(page, -back_scroll)
         await simulate_human_behavior(page)
 
 
 async def scroll_to_top(page: Page) -> None:
     """Scroll back to the top of the page."""
     await page.evaluate("""
-        const searchContainer = document.querySelector('[class*="search-page-list-container"]');
-        if (searchContainer) {
-            searchContainer.scrollTop = 0;
-        } else {
-            window.scrollTo(0, 0);
-        }
+        window.scrollTo(0, 0);
     """)
     await simulate_human_behavior(page)
 
 
 async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_change: int = 3, max_scroll_attempts: int = 50) -> None:
     """Scroll through search results to trigger lazy loading."""
-    await page.wait_for_selector('[class*="search-page-list-container"]', timeout=10000)
+    await page.wait_for_selector('[id="grid-search-results"]', timeout=10000)
 
     previous_count = 0
     no_change_iterations = 0
@@ -168,7 +164,7 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
         if current_count == previous_count:
             no_change_iterations += 1
             if no_change_iterations >= max_no_change:
-                logger.warning("No new content loaded after several attempts, stopping")
+                logger.warning("No new content loaded after %s attempts, stopping", iteration)
                 break
         else:
             no_change_iterations = 0
