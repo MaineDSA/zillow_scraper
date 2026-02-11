@@ -34,7 +34,7 @@ class ZillowCardParser:
     _PATTERN_BED_NUM = re.compile(r"\d+")
 
     PRICE_CLEANUP_PATTERNS: ClassVar[list[tuple[str, str, re.RegexFlag]]] = [
-        (r"\+?\s*\d+\s*bds?(?:\s|$)", "", re.IGNORECASE),
+        (r"\s+\d+\s*bds?(?:\s|$)", "", re.IGNORECASE),
         (r"\+?\s*bd(?:\s|$)", "", re.IGNORECASE),
         (r"\s+", " ", re.NOFLAG),
     ]
