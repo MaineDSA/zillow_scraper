@@ -62,7 +62,7 @@ async def scrape_and_submit(context: BrowserContext, config: Config) -> None:
     await submit_listings_to_destination(context, config, listings)
 
 
-async def main() -> None:
+async def configure_and_run() -> None:
     """Load configurations and run scraper for each."""
     configs = load_configs()
     async with create_browser_context() as context:
@@ -72,5 +72,10 @@ async def main() -> None:
             logger.debug("Completed config: '%s'", config.config_name)
 
 
+def main() -> None:
+    """Call configure_and_run via asyncio.run."""
+    asyncio.run(configure_and_run())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
