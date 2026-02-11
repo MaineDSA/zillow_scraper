@@ -3,12 +3,14 @@
 import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 from _pytest.logging import LogCaptureFixture
 
 from src.config import Config, SubmissionType
-from src.main import main
+from src.main import configure_and_run
 
 
+@pytest.mark.asyncio
 async def test_main_with_mocked_configs(caplog: LogCaptureFixture) -> None:
     """Test that main() works with multiple configs."""
     mock_config = [
@@ -35,11 +37,11 @@ async def test_main_with_mocked_configs(caplog: LogCaptureFixture) -> None:
     ):
         # Mock the async context manager
         mock_browser_context = MagicMock()
-        mock_context.return_value.__aenter__.return_value = mock_browser_context
-        mock_context.return_value.__aexit__.return_value = None
+        mock_context.return_value.__aenter__ = AsyncMock(return_value=mock_browser_context)
+        mock_context.return_value.__aexit__ = AsyncMock(return_value=None)
 
-        # Run the actual main function
-        main()
+        # Run the actual main function with await
+        await configure_and_run()
 
         # Verify scrape_and_submit was called twice (once per config)
         assert mock_scrape_and_submit.call_count == 2
