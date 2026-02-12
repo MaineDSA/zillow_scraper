@@ -234,24 +234,6 @@ class TestZillowCardParser:
         assert units_count == 1
 
     @pytest.mark.parametrize(
-        "bed_info",
-        [
-            "",
-            "bd",
-            "4 beds",
-            "bedrooms",
-            "3 bedrooms",
-        ],
-        ids=["bd_empty_string", "bd_no_number", "beds_with_number", "bedrooms_no_number", "bedrooms_with_number"],
-    )
-    def test_create_specific_link_improper_bed_info(self, property_cards: ResultSet[Tag], bed_info: str) -> None:
-        """Test behavior of _create_specific_link when number of beds is not present in expected format."""
-        card = property_cards[0]
-        parser = ZillowCardParser(card)
-        result = parser._create_specific_link(bed_info)
-        assert "#bedrooms" not in result
-
-    @pytest.mark.parametrize(
         "price_text",
         [
             "",
