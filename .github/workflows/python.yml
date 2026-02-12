@@ -28,6 +28,7 @@ jobs:
           - macos-latest
         resolution:
           - highest
+          - lowest-direct
 
     permissions:
       contents: write
