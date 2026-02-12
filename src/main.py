@@ -5,7 +5,15 @@ import logging
 
 from patchright.async_api import BrowserContext
 
-from src.automation import create_browser_context, deduplicate_listings, get_browser_page, scrape_all_pages, simulate_human_behavior, sort_by_newest
+from src.automation import (
+    close_modal_if_present,
+    create_browser_context,
+    deduplicate_listings,
+    get_browser_page,
+    scrape_all_pages,
+    simulate_human_behavior,
+    sort_by_newest,
+)
 from src.config import Config, SubmissionType, load_configs
 from src.form_submission import submit_listings
 from src.scraper import PropertyListing
@@ -25,6 +33,8 @@ async def scrape_listings(context: BrowserContext, config: Config) -> list[Prope
         if await page.get_by_text("Press & Hold").count() > 0:
             error_msg = "CAPTCHA detected, cannot continue."
             raise BaseException(error_msg)
+
+        await close_modal_if_present(page)
 
         logger.info("Scraping all listings...")
         await sort_by_newest(page)
