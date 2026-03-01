@@ -40,18 +40,15 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+      - uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
+          python-version: ${{ matrix.python }}
+          activate-environment: true
+          cache-dependency-glob: '**/pyproject.toml'
 
-      - uses: install-pinned/uv@0590ea0c73b1fdb765847c94975e71c97d9ad0b1
+      - run: uv pip install --resolution ${{ matrix.resolution }} -e .[dev]
 
-      - run: |
-          uv pip install --system --resolution ${{ matrix.resolution }} -e .[dev]
-
-      - run: |
-          patchright install chrome
+      - run: patchright install chrome
 
       - id: cache-pytest
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
@@ -84,14 +81,13 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+      - uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098
         with:
-          python-version: 3.13
-          cache: pip
+          python-version: ${{ matrix.python }}
+          activate-environment: true
+          cache-dependency-glob: '**/pyproject.toml'
 
-      - uses: install-pinned/uv@0590ea0c73b1fdb765847c94975e71c97d9ad0b1
-
-      - run: uv pip install --system .[dev]
+      - run: uv pip install .[dev]
 
       - id: cache-ruff
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
@@ -121,14 +117,13 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+      - uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098
         with:
-          python-version: 3.13
-          cache: pip
+          python-version: ${{ matrix.python }}
+          activate-environment: true
+          cache-dependency-glob: '**/pyproject.toml'
 
-      - uses: install-pinned/uv@0590ea0c73b1fdb765847c94975e71c97d9ad0b1
-
-      - run: uv pip install --system .[dev]
+      - run: uv pip install .[dev]
 
       - id: cache-ruff
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
@@ -170,18 +165,16 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+      - uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098
         with:
-          python-version: 3.13
-          cache: pip
+          python-version: ${{ matrix.python }}
+          activate-environment: true
+          cache-dependency-glob: '**/pyproject.toml'
 
-      - uses: install-pinned/uv@0590ea0c73b1fdb765847c94975e71c97d9ad0b1
-
-      - run: uv pip install --system .[dev]
+      - run: uv pip install .[dev]
 
       - id: run-bandit-sarif
-        run: |
-          bandit --confidence-level 'medium' --severity-level 'medium' --recursive 'src' --format 'sarif' --output 'results.sarif'
+        run: bandit --confidence-level 'medium' --severity-level 'medium' --recursive 'src' --format 'sarif' --output 'results.sarif'
 
       - uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30
         if: ( success() || failure() ) && contains('["success", "failure"]', steps.run-bandit-sarif.outcome)
@@ -190,8 +183,7 @@ jobs:
 
       - id: run-bandit
         if: failure() && contains('["failure"]', steps.run-bandit-sarif.outcome)
-        run: |
-          bandit --confidence-level 'medium' --severity-level 'medium' --recursive 'src'
+        run: bandit --confidence-level 'medium' --severity-level 'medium' --recursive 'src'
 
 
   mypy:
@@ -209,14 +201,13 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+      - uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098
         with:
-          python-version: '3.13'
-          cache: pip
+          python-version: ${{ matrix.python }}
+          activate-environment: true
+          cache-dependency-glob: '**/pyproject.toml'
 
-      - uses: install-pinned/uv@0590ea0c73b1fdb765847c94975e71c97d9ad0b1
-
-      - run: uv pip install --system -e .[dev]
+      - run: uv pip install -e .[dev]
 
       - id: cache-mypy
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
@@ -286,14 +277,13 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+      - uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098
         with:
-          python-version: 3.13
-          cache: pip
+          python-version: ${{ matrix.python }}
+          activate-environment: true
+          cache-dependency-glob: '**/pyproject.toml'
 
-      - uses: install-pinned/uv@0590ea0c73b1fdb765847c94975e71c97d9ad0b1
-
-      - run: uv pip install --system .[dev]
+      - run: uv pip install .[dev]
 
       - id: cache-pre-commit
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
@@ -301,8 +291,6 @@ jobs:
           path: .pre-commit-cache
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}-${{ hashFiles('pyproject.toml') }}
 
-      - run: |
-          pre-commit install
-          pre-commit run --all-files
+      - run: pre-commit run --all-files
         env:
           PRE_COMMIT_HOME: .pre-commit-cache
