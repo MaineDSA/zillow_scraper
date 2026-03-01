@@ -35,6 +35,7 @@ jobs:
     secrets: inherit
     with:
       src_folder: "src"
+      python_version: "3.13"
 
   test:
     uses: bmos/bmos/.github/workflows/python-test.yml@main
@@ -43,3 +44,4 @@ jobs:
     with:
       src_folder: "src"
       test_folder: "tests"
+      python_version: "['3.11', '3.12', '3.13', '3.14']"
