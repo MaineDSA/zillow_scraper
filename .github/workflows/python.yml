@@ -10,13 +10,35 @@ on:
   workflow_dispatch:
 
 permissions:
+  # Write
   contents: write
+  id-token: write
   pull-requests: write
   security-events: write
+  # Read
+  actions: read
+  artifact-metadata: read
+  attestations: read
+  checks: read
+  deployments: read
+  discussions: read
+  issues: read
+  models: read
+  packages: read
+  pages: read
+  repository-projects: read
+  statuses: read
 
 jobs:
-  full-pipeline:
-    uses: bmos/bmos/.github/workflows/python-ci.yml@main
+  lint:
+    uses: bmos/bmos/.github/workflows/python-lint.yml@main
+    secrets: inherit
+    with:
+      src_folder: "src"
+
+  test:
+    uses: bmos/bmos/.github/workflows/python-test.yml@main
+    needs: lint
     secrets: inherit
     with:
       src_folder: "src"
