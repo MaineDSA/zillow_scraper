@@ -51,7 +51,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           activate-environment: true
-          cache-dependency-glob: '**/pyproject.toml'
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
 
       - run: uv pip install --resolution ${{ matrix.resolution }} -e .[dev]
 
@@ -132,7 +134,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           activate-environment: true
-          cache-dependency-glob: '**/pyproject.toml'
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
 
       - run: uv pip install .[dev]
 
@@ -169,7 +173,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           activate-environment: true
-          cache-dependency-glob: '**/pyproject.toml'
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
 
       - run: uv pip install .[dev]
 
@@ -218,7 +224,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           activate-environment: true
-          cache-dependency-glob: '**/pyproject.toml'
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
 
       - run: uv pip install .[dev]
 
@@ -292,7 +300,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           activate-environment: true
-          cache-dependency-glob: '**/pyproject.toml'
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
 
       - run: uv pip install -e .[dev]
 
@@ -334,7 +344,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           activate-environment: true
-          cache-dependency-glob: '**/pyproject.toml'
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
 
       - run: uv pip install .[dev]
 
