@@ -9,25 +9,7 @@ on:
     - cron: 0 0 * * 1
   workflow_dispatch:
 
-permissions:
-  # Write
-  contents: write
-  id-token: write
-  pull-requests: write
-  security-events: write
-  # Read
-  actions: read
-  artifact-metadata: read
-  attestations: read
-  checks: read
-  deployments: read
-  discussions: read
-  issues: read
-  models: read
-  packages: read
-  pages: read
-  repository-projects: read
-  statuses: read
+permissions: read-all
 
 jobs:
   lint:
@@ -36,6 +18,10 @@ jobs:
     with:
       src_folder: "src"
       python_version: "3.13"
+    permissions:
+      # Write
+      contents: write
+      security-events: write
 
   test:
     uses: bmos/bmos/.github/workflows/python-test.yml@main
@@ -45,3 +31,7 @@ jobs:
       src_folder: "src"
       test_folder: "tests"
       python_version: "['3.11', '3.12', '3.13', '3.14']"
+    permissions:
+      # Write
+      contents: write
+      pull-requests: write
