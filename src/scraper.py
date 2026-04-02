@@ -48,8 +48,8 @@ class ZillowCardParser:
 
     def _parse_main_link(self) -> str:
         """Extract main property link from property card."""
-        link_element = self.card.find("a", class_="property-card-link", attrs={"data-test": "property-card-link"})
-        if not isinstance(link_element, Tag):
+        link_element = self.card.find("a", class_=re.compile("property.+-link"), attrs={"data-test": re.compile("property.+-link")})
+        if not isinstance(link_element, Tag) or not link_element.get("href"):
             return ""
 
         href = cast("str", link_element.get("href", "")).strip()
@@ -118,11 +118,11 @@ class ZillowCardParser:
 
     def _get_units_count(self) -> int:
         """Extract number of available units."""
-        badge_area = self.card.find("div", class_=re.compile(r"StyledPropertyCardBadgeArea"))
+        badge_area = self.card.find("div", attrs={"data-c11n-component": "PropertyCard.BadgeArea"})
         if not badge_area or isinstance(badge_area, NavigableString):
             return 1
 
-        badges = badge_area.find_all("span", class_=re.compile(r"StyledPropertyCardBadge"))
+        badges = badge_area.find_all("span", attrs={"data-c11n-component": "PropertyCard.Badge"})
         for badge in badges:
             badge_text = badge.get_text(strip=True).lower()
             unit_match = self._PATTERN_UNIT_COUNT.search(badge_text)
