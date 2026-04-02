@@ -133,7 +133,7 @@ async def test_submit_listings_uses_random_waits() -> None:
     ]
     form_url = "https://example.com/form"
 
-    wait_times = []
+    wait_times: list[int] = []
     mock_page.wait_for_timeout.side_effect = wait_times.append
 
     with patch("src.form_submission.cryptogen.randint") as mock_randint:
