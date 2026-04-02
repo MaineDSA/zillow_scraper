@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup, ResultSet, Tag
 def zillow_search_page_html() -> str:
     """Load the vendored Zillow search results page as html text."""
     html_example_folder = Path("tests/vendored")
-    return (html_example_folder / "zillow-search-boston-20251128-1.html").read_text(encoding="utf-8")
+    return (html_example_folder / "zillow-search-boston-20260402-1.html").read_text(encoding="utf-8")
 
 
 @pytest.fixture
