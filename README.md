@@ -25,7 +25,7 @@ This Python script scrapes apartment listings from a Zillow clone site and optio
 
     ```shell
     pip install .
-    patchright install
+    patchright install chrome
     ```
 
 1. Create a folder called `env` in the project directory with one or more files each containing the following contents:
