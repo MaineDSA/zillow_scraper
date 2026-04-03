@@ -19,7 +19,6 @@ from src.constants import (
     MIN_SCROLL_UP,
     MIN_WAIT_TIME,
     PROBABILITY_SCROLL_UP,
-    ZillowParseError,
 )
 from src.scraper import PropertyListing, ZillowHomeFinder
 
@@ -68,13 +67,14 @@ async def get_browser_page(context: BrowserContext, *, require_new_page: bool = 
 async def close_modal_if_present(page: Page) -> None:
     """Close modal dialog by clicking button with class containing 'CloseButton', if present."""
     try:
+        await page.wait_for_load_state()
         close_button = page.locator("button[class*='CloseButton']").first
         is_visible = await close_button.is_visible()
-        if not is_visible:
-            msg = "Popup modal blocked page loading, cannot scrape."
-            raise ZillowParseError(msg)
-        logger.debug("Popup modal detected, closing it")
-        await close_button.click()
+        if is_visible:
+            logger.debug("Popup modal detected, attempting to close it")
+            await close_button.click()
+            return
+        logger.warning("Invisible CloseButton modal found")
     except TimeoutError as e:
         logger.debug("No CloseButton modal found or could not close: %s", e)
 
