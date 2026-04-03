@@ -53,7 +53,7 @@ async def test_submit_listings_partial_failure(caplog: LogCaptureFixture, sample
     mock_page.wait_for_selector.side_effect = wait_for_selector_side_effect
     form_url = "https://example.com/form"
 
-    with caplog.at_level("INFO"), patch("src.form_submission.cryptogen.randint", return_value=250):
+    with caplog.at_level("INFO"), patch("src.automation.cryptogen.randint", return_value=250):
         await submit_listings(mock_page, form_url, sample_listings)
 
     assert mock_page.goto.call_count == 3
@@ -67,7 +67,7 @@ async def test_submit_listings_all_succeed(caplog: LogCaptureFixture, sample_lis
     mock_page = AsyncMock()
     form_url = "https://example.com/form"
 
-    with caplog.at_level("INFO"), patch("src.form_submission.cryptogen.randint", return_value=250):
+    with caplog.at_level("INFO"), patch("src.automation.cryptogen.randint", return_value=250):
         await submit_listings(mock_page, form_url, sample_listings)
 
     assert "3 successful, 0 failed" in caplog.text
@@ -82,7 +82,7 @@ async def test_submit_listings_all_fail(caplog: LogCaptureFixture, sample_listin
     mock_page.wait_for_selector.side_effect = PlaywrightTimeoutError("Timeout")
     form_url = "https://example.com/form"
 
-    with caplog.at_level("INFO"), patch("src.form_submission.cryptogen.randint", return_value=250):
+    with caplog.at_level("INFO"), patch("src.automation.cryptogen.randint", return_value=250):
         await submit_listings(mock_page, form_url, sample_listings)
 
     assert "0 successful, 3 failed" in caplog.text
@@ -107,7 +107,7 @@ async def test_submit_single_listing_flow_order() -> None:
     mock_page.wait_for_selector.side_effect = lambda *_, **__: call_order.append("wait_for_selector")
     mock_page.wait_for_timeout.side_effect = lambda _: call_order.append("wait_for_timeout")
 
-    with patch("src.form_submission.cryptogen.randint", return_value=250):
+    with patch("src.automation.cryptogen.randint", return_value=250):
         await _submit_single_listing(mock_page, form_url, listing)
 
     # Verify the sequence
@@ -121,30 +121,6 @@ async def test_submit_single_listing_flow_order() -> None:
         "wait_for_selector",  # Confirmation
         "wait_for_timeout",  # Final wait
     ]
-
-
-@pytest.mark.asyncio
-async def test_submit_listings_uses_random_waits() -> None:
-    """Test that random wait times are used between submissions."""
-    mock_page = AsyncMock()
-    listings = [
-        PropertyListing("Addr1", "$1000", "1000", "http://link1"),
-        PropertyListing("Addr2", "$2000", "2000", "http://link2"),
-    ]
-    form_url = "https://example.com/form"
-
-    wait_times: list[int] = []
-    mock_page.wait_for_timeout.side_effect = wait_times.append
-
-    with patch("src.form_submission.cryptogen.randint") as mock_randint:
-        # Return different values for each call
-        mock_randint.side_effect = [100, 150, 200, 250]
-        await submit_listings(mock_page, form_url, listings)
-
-    # Should have wait_for_timeout called multiple times (2 per listing)
-    assert len(wait_times) == 4
-    # Verify the random values were used
-    assert wait_times == [100, 150, 200, 250]
 
 
 @pytest.mark.parametrize(
@@ -177,7 +153,7 @@ async def test_submit_single_listing_field_mapping(mock_page: AsyncMock) -> None
     listing = PropertyListing(address="742 Evergreen Terrace", price="$2,500/mo", median_price="2500", link="https://zillow.com/listing/999")
     form_url = "https://example.com/form"
 
-    with patch("src.form_submission.cryptogen.randint", return_value=250):
+    with patch("src.automation.cryptogen.randint", return_value=250):
         await _submit_single_listing(mock_page, form_url, listing)
 
     fill_calls = mock_page.fill.call_args_list

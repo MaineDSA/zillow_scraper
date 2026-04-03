@@ -193,6 +193,7 @@ async def scroll_and_load_listings(page: Page, max_entries: int = 100, max_no_ch
     logger.debug("Lazy loading complete. Total property cards loaded: %s", final_count)
 
     await scroll_to_top(page)
+    await simulate_human_behavior(page)
 
 
 async def check_and_click_next_page(page: Page) -> bool:
@@ -246,7 +247,7 @@ async def sort_by_newest(page: Page) -> None:
 
     await sort_button.click()
     await page.wait_for_load_state()
-    await page.wait_for_timeout(1.23)
+    await simulate_human_behavior(page)
 
     newest_button = page.get_by_text("Newest")
     if not newest_button:

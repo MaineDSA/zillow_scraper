@@ -39,7 +39,6 @@ async def scrape_listings(context: BrowserContext, config: Config) -> list[Prope
 
         logger.info("Scraping all listings...")
         await sort_by_newest(page)
-        await page.wait_for_timeout(0.84)
         all_listings = await scrape_all_pages(page)
 
     logger.info("Deduplicating %s listings...", len(all_listings))
