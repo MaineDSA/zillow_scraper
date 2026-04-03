@@ -55,7 +55,7 @@ class TestZillowHomeFinder:
     def test_finds_property_listings(self, zillow_search_page: BeautifulSoup) -> None:
         """Check number of property listings found on the page."""
         finder = ZillowHomeFinder(zillow_search_page)
-        assert len(finder.listings) == 83
+        assert len(finder.listings) == 13
 
     def test_all_listings_have_required_fields(self, zillow_search_page: BeautifulSoup) -> None:
         """Every listing should have address, price, and link."""
@@ -101,12 +101,12 @@ class TestZillowCardParser:
         ("card_number", "expected_listings"),
         [
             (
-                0,
+                2,
                 [
                     {
-                        "address": "95 Saint, 95 Saint Alphonsus St, Roxbury Crossing, MA 02120",
-                        "price": "$4,919",
-                        "link": "https://www.zillow.com/apartments/boston-ma/95-saint/CkBG9z/",
+                        "address": "430 River Street, 430 River St, Mattapan, MA 02126",
+                        "price": "$1,950",
+                        "link": "https://www.zillow.com/apartments/mattapan-ma/430-river-street/CmPd2v/",
                     }
                 ],
             ),
@@ -114,29 +114,24 @@ class TestZillowCardParser:
                 1,
                 [
                     {
-                        "address": "Harper  80 Rugg Rd, Allston, MA (Studio)",
-                        "price": "$2,975",
-                        "link": "https://www.zillow.com/apartments/allston-ma/harper/Cm4BqX/#bedrooms-0",
+                        "address": "480 Norfolk St  480 Norfolk St, Mattapan, MA (1bd)",
+                        "price": "$2,050",
+                        "link": "https://www.zillow.com/apartments/mattapan-ma/480-norfolk-st/CpznWD/#bedrooms-1",
                     },
                     {
-                        "address": "Harper  80 Rugg Rd, Allston, MA (1bd)",
-                        "price": "$3,524",
-                        "link": "https://www.zillow.com/apartments/allston-ma/harper/Cm4BqX/#bedrooms-1",
-                    },
-                    {
-                        "address": "Harper  80 Rugg Rd, Allston, MA (2bd)",
-                        "price": "$4,333",
-                        "link": "https://www.zillow.com/apartments/allston-ma/harper/Cm4BqX/#bedrooms-2",
+                        "address": "480 Norfolk St  480 Norfolk St, Mattapan, MA (2bd)",
+                        "price": "$2,500",
+                        "link": "https://www.zillow.com/apartments/mattapan-ma/480-norfolk-st/CpznWD/#bedrooms-2",
                     },
                 ],
             ),
             (
-                3,
+                5,
                 [
                     {
-                        "address": "The Longwood  1575 Tremont St, Roxbury Crossing, MA (7 units available)",
-                        "price": "$2,850 - $3,761",
-                        "link": "https://www.zillow.com/apartments/boston-ma/the-longwood/5XmPS7/",
+                        "address": "24 Royce Rd, Boston, MA",
+                        "price": "$2,795",
+                        "link": "https://www.zillow.com/apartments/allston-ma/24-royce-rd./CqyhYD/",
                     }
                 ],
             ),
@@ -180,16 +175,16 @@ class TestZillowCardParser:
 
     def test_units_count_extraction(self, property_cards: ResultSet[Tag]) -> None:
         """Should extract units available count for listing with 'available units'."""
-        card = property_cards[21]  # Multi-unit with 'available units' shown
+        card = property_cards[3]  # Multi-unit with 'available units' shown
         parser = ZillowCardParser(card)
         units = parser._get_units_count()
         assert units > 1
         listings = parser.parse()
-        assert all("10 units available" in listing.address for listing in listings)
+        assert all("32 units available" in listing.address for listing in listings)
 
     def test_units_price_range_extraction(self, property_cards: ResultSet[Tag]) -> None:
         """Should extract price range for listing with 'available units'."""
-        card = property_cards[21]  # Multi-unit with 'available units' shown
+        card = property_cards[3]  # Multi-unit with 'available units' shown
         parser = ZillowCardParser(card)
         units = parser._get_units_count()
         assert units > 1
@@ -232,24 +227,6 @@ class TestZillowCardParser:
         parser = ZillowCardParser(card)
         units_count = parser._get_units_count()
         assert units_count == 1
-
-    @pytest.mark.parametrize(
-        "bed_info",
-        [
-            "",
-            "bd",
-            "4 beds",
-            "bedrooms",
-            "3 bedrooms",
-        ],
-        ids=["bd_empty_string", "bd_no_number", "beds_with_number", "bedrooms_no_number", "bedrooms_with_number"],
-    )
-    def test_create_specific_link_improper_bed_info(self, property_cards: ResultSet[Tag], bed_info: str) -> None:
-        """Test behavior of _create_specific_link when number of beds is not present in expected format."""
-        card = property_cards[0]
-        parser = ZillowCardParser(card)
-        result = parser._create_specific_link(bed_info)
-        assert "#bedrooms" not in result
 
     @pytest.mark.parametrize(
         "price_text",

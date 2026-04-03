@@ -48,8 +48,8 @@ class ZillowCardParser:
 
     def _parse_main_link(self) -> str:
         """Extract main property link from property card."""
-        link_element = self.card.find("a", class_="property-card-link", attrs={"data-test": "property-card-link"})
-        if not isinstance(link_element, Tag):
+        link_element = self.card.find("a", class_=re.compile("property.+-link"), attrs={"data-test": re.compile("property.+-link")})
+        if not isinstance(link_element, Tag) or not link_element.get("href"):
             return ""
 
         href = cast("str", link_element.get("href", "")).strip()
@@ -118,11 +118,11 @@ class ZillowCardParser:
 
     def _get_units_count(self) -> int:
         """Extract number of available units."""
-        badge_area = self.card.find("div", class_=re.compile(r"StyledPropertyCardBadgeArea"))
+        badge_area = self.card.find("div", attrs={"data-c11n-component": "PropertyCard.BadgeArea"})
         if not badge_area or isinstance(badge_area, NavigableString):
             return 1
 
-        badges = badge_area.find_all("span", class_=re.compile(r"StyledPropertyCardBadge"))
+        badges = badge_area.find_all("span", attrs={"data-c11n-component": "PropertyCard.Badge"})
         for badge in badges:
             badge_text = badge.get_text(strip=True).lower()
             unit_match = self._PATTERN_UNIT_COUNT.search(badge_text)
@@ -151,7 +151,23 @@ class ZillowCardParser:
         if not main_price_element:
             return []
 
-        price_text = self._clean_price_text(main_price_element.get_text(strip=True))
+        # The price container can contains multiple spans like "Fees may apply".
+        # get_text() on the outer span concatenates them without spaces, corrupting
+        # the price text (e.g. "$1,608+ 2 bdsFees may apply"). Instead, grab only
+        # the first nested span which contains the actual price string.
+        inner_span = main_price_element.find("span")
+        if inner_span and not isinstance(inner_span, Tag):
+            msg = f"inner_span type is incorrect: {type(inner_span)}"
+            raise TypeError(msg)
+
+        price_span = inner_span.find("span") if inner_span else None
+        if price_span and not isinstance(price_span, Tag):
+            msg = f"price_span type is incorrect: {type(price_span)}"
+            raise TypeError(msg)
+
+        raw_text = (price_span or inner_span or main_price_element).get_text(strip=True)
+
+        price_text = self._clean_price_text(raw_text)
         if not price_text:
             return []
 
@@ -170,22 +186,32 @@ class ZillowCardParser:
         if not inventory_section or isinstance(inventory_section, NavigableString):
             return []
 
-        # Extract price and bedroom data
-        price_elements = inventory_section.find_all("span", class_=re.compile(r"PriceText"))
-        bed_elements = inventory_section.find_all("span", class_=re.compile(r"BedText"))
+        price_bed_pairs: list[tuple[str, str, str]] = []  # (price, bed_info, link)
+        for anchor in inventory_section.find_all("a"):
+            box = anchor.find("div", attrs={"data-testid": "PropertyCardInventoryBox"})
+            if not box or isinstance(box, NavigableString):
+                continue
 
-        price_bed_pairs = []
-        for i, price_elem in enumerate(price_elements):
-            price_text = self._clean_price_text(price_elem.get_text(strip=True))
-            if price_text:
-                bed_info = bed_elements[i].get_text(strip=True) if i < len(bed_elements) else ""
-                price_bed_pairs.append((price_text, bed_info))
+            spans = box.find_all("span")
+            if not spans:
+                continue
+
+            price_text = self._clean_price_text(spans[0].get_text(strip=True))
+            if not price_text:
+                continue
+
+            bed_info = spans[1].get_text(strip=True) if len(spans) > 1 else ""
+
+            href = cast("str", anchor.get("href", "")).strip()
+            link = href if href.startswith("http") else f"https://www.zillow.com{href}"
+
+            price_bed_pairs.append((price_text, bed_info, link))
 
         units_count = self._get_units_count()
 
         # Handle multiple units with price range
         if units_count > 1 and len(price_bed_pairs) > 1:
-            prices = [price for price, _ in price_bed_pairs]
+            prices = [price for price, _, __ in price_bed_pairs]
             price_range = cast("str", self._format_price_range(prices))
 
             # Calculate median of the range
@@ -199,15 +225,14 @@ class ZillowCardParser:
 
         # Create individual listings
         listings = []
-        for price, bed_info in price_bed_pairs:
+        for price, bed_info, link in price_bed_pairs:
             address = self.address + (f" ({bed_info})" if bed_info else "")
-            specific_link = self._create_specific_link(bed_info)
 
             # For individual listings, median is same as price
             numeric_price = self._extract_numeric_price(price)
             median_price = str(numeric_price) if numeric_price else price
 
-            listings.append(PropertyListing(address, price, median_price, specific_link))
+            listings.append(PropertyListing(address, price, median_price, link))
 
         return listings
 

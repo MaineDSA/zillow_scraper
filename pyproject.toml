@@ -8,7 +8,7 @@ dependencies = [
     "beautifulsoup4~=4.14.0",
     "google-auth~=2.49.1",
     "gspread~=6.2.1",
-    "patchright~=1.57.2",
+    "patchright~=1.58.2",
     "python-dotenv~=1.2.0",
     "tqdm~=4.67.0",
 ]
@@ -165,3 +165,7 @@ exclude_also = [
     'if __name__ == "__main__":',
     "main\\(\\)",
 ]
+
+[tool.mypy]
+local_partial_types = true
+strict_bytes = true
