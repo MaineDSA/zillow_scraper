@@ -35,9 +35,11 @@ async def scrape_listings(context: BrowserContext, config: Config) -> list[Prope
             raise BaseException(error_msg)
 
         await close_modal_if_present(page)
+        await simulate_human_behavior(page)
 
         logger.info("Scraping all listings...")
         await sort_by_newest(page)
+        await page.wait_for_timeout(0.84)
         all_listings = await scrape_all_pages(page)
 
     logger.info("Deduplicating %s listings...", len(all_listings))

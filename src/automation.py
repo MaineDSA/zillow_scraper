@@ -246,6 +246,7 @@ async def sort_by_newest(page: Page) -> None:
 
     await sort_button.click()
     await page.wait_for_load_state()
+    await page.wait_for_timeout(1.23)
 
     newest_button = page.get_by_text("Newest")
     if not newest_button:
