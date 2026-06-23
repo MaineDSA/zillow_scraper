@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: 'v6.0.0'
+      rev: v6.0.0
       hooks:
           - id: check-yaml
           - id: check-ast
@@ -20,11 +20,12 @@ repos:
             args: ['--confidence-level', 'medium']
             files: '^src'
     - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.15.4
+      rev: v0.15.18
       hooks:
-          - id: ruff
+          - id: ruff-check
+            args: ['--fix']
           - id: ruff-format
     - repo: https://github.com/bwhmather/ssort
-      rev: 0.15.0
+      rev: 0.16.0
       hooks:
           - id: ssort
