@@ -65,10 +65,10 @@ async def get_browser_page(context: BrowserContext, *, require_new_page: bool = 
 
 
 async def close_modal_if_present(page: Page) -> None:
-    """Close modal dialog by clicking button with class containing 'CloseButton', if present."""
+    """Close modal dialog."""
     try:
         await page.wait_for_load_state()
-        close_button = page.locator("button[class*='CloseButton']").first
+        close_button = page.locator("button[data-c11n-component='Modal.CloseButton']").first
         is_visible = await close_button.is_visible()
         if is_visible:
             logger.debug("Popup modal detected, attempting to close it")
