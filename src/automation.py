@@ -111,7 +111,8 @@ async def scroll_page(page: Page, amount: int) -> None:
 
 async def simulate_human_behavior(page: Page) -> None:
     """Simulate human-like mouse movements and pauses."""
-    if await page.get_by_text("Press & Hold").count() > 0:
+    captcha = page.get_by_text("Press & Hold")
+    if await captcha.is_visible():
         error_msg = "CAPTCHA detected, cannot continue."
         raise ZillowParseError(error_msg)
 
