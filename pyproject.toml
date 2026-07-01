@@ -43,7 +43,7 @@ dev = [
     {include-group = "types"},
 ]
 lint = [
-    "ruff==0.15.18",
+    "ruff==0.15.20",
     "ssort==0.16.0",
 ]
 pre-commit = [
