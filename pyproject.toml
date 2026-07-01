@@ -6,9 +6,9 @@ requires-python = ">=3.11"
 license = { file = "LICENSE" }
 dependencies = [
     "beautifulsoup4~=4.15.0",
-    "google-auth~=2.55.0",
+    "google-auth~=2.55.1",
     "gspread~=6.2.1",
-    "patchright>=1.60.1,<1.62.0",
+    "patchright~=1.61.1",
     "python-dotenv~=1.2.2",
     "tqdm~=4.68.3",
 ]
@@ -43,7 +43,7 @@ dev = [
     {include-group = "types"},
 ]
 lint = [
-    "ruff==0.15.18",
+    "ruff==0.15.20",
     "ssort==0.16.0",
 ]
 pre-commit = [
@@ -63,8 +63,8 @@ test = [
 ]
 types = [
     "mypy~=2.1.0",
-    "types-beautifulsoup4~=4.12.0.20250516",
-    "types-tqdm~=4.68.0.20260608",
+    "types-beautifulsoup4~=4.12.0",
+    "types-tqdm~=4.68.0",
 ]
 
 [tool]
