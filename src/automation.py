@@ -11,15 +11,7 @@ from bs4 import BeautifulSoup
 from patchright.async_api import BrowserContext, Page, async_playwright
 from tqdm import tqdm
 
-from src.constants import (
-    MAX_SCROLL_DOWN,
-    MAX_SCROLL_UP,
-    MAX_WAIT_TIME,
-    MIN_SCROLL_DOWN,
-    MIN_SCROLL_UP,
-    MIN_WAIT_TIME,
-    PROBABILITY_SCROLL_UP,
-)
+from src.constants import MAX_SCROLL_DOWN, MAX_SCROLL_UP, MAX_WAIT_TIME, MIN_SCROLL_DOWN, MIN_SCROLL_UP, MIN_WAIT_TIME, PROBABILITY_SCROLL_UP, ZillowParseError
 from src.scraper import PropertyListing, ZillowHomeFinder
 
 logger = logging.getLogger(__name__)
@@ -119,6 +111,11 @@ async def scroll_page(page: Page, amount: int) -> None:
 
 async def simulate_human_behavior(page: Page) -> None:
     """Simulate human-like mouse movements and pauses."""
+    captcha = page.get_by_text("Press & Hold")
+    if await captcha.is_visible():
+        error_msg = "CAPTCHA detected, cannot continue."
+        raise ZillowParseError(error_msg)
+
     window_dimensions = await page.evaluate("""
         () => ({
             width: window.innerWidth,

@@ -1,7 +1,7 @@
 """Tests for form_submission.py."""
 
 import logging
-from unittest.mock import AsyncMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -14,13 +14,22 @@ from src.scraper import PropertyListing
 
 @pytest.fixture
 def mock_page() -> AsyncMock:
-    """Create a mock page object."""
+    """Create a mock page object with standard Playwright locator methods pre-mocked."""
     page = AsyncMock()
+
     page.goto = AsyncMock()
     page.fill = AsyncMock()
     page.click = AsyncMock()
     page.wait_for_selector = AsyncMock()
     page.wait_for_timeout = AsyncMock()
+
+    mock_locator = MagicMock()
+    mock_locator.is_visible = AsyncMock(return_value=False)  # Default: No CAPTCHA triggered
+
+    page.get_by_text = MagicMock(return_value=mock_locator)
+    page.get_by_role = MagicMock(return_value=mock_locator)
+    page.locator = MagicMock(return_value=mock_locator)
+
     return page
 
 
@@ -35,10 +44,8 @@ def sample_listings() -> list[PropertyListing]:
 
 
 @pytest.mark.asyncio
-async def test_submit_listings_partial_failure(caplog: LogCaptureFixture, sample_listings: list[PropertyListing]) -> None:
+async def test_submit_listings_partial_failure(mock_page: AsyncMock, caplog: LogCaptureFixture, sample_listings: list[PropertyListing]) -> None:
     """Test that submit_listings continues after individual failures and logs correctly."""
-    mock_page = AsyncMock()
-
     # Make the second submission fail
     call_count = 0
 
@@ -62,9 +69,8 @@ async def test_submit_listings_partial_failure(caplog: LogCaptureFixture, sample
 
 
 @pytest.mark.asyncio
-async def test_submit_listings_all_succeed(caplog: LogCaptureFixture, sample_listings: list[PropertyListing]) -> None:
+async def test_submit_listings_all_succeed(mock_page: AsyncMock, caplog: LogCaptureFixture, sample_listings: list[PropertyListing]) -> None:
     """Test successful submission of all listings."""
-    mock_page = AsyncMock()
     form_url = "https://example.com/form"
 
     with caplog.at_level("INFO"), patch("src.automation.cryptogen.randint", return_value=250):
@@ -76,9 +82,8 @@ async def test_submit_listings_all_succeed(caplog: LogCaptureFixture, sample_lis
 
 
 @pytest.mark.asyncio
-async def test_submit_listings_all_fail(caplog: LogCaptureFixture, sample_listings: list[PropertyListing]) -> None:
+async def test_submit_listings_all_fail(mock_page: AsyncMock, caplog: LogCaptureFixture, sample_listings: list[PropertyListing]) -> None:
     """Test when all submissions fail."""
-    mock_page = AsyncMock()
     mock_page.wait_for_selector.side_effect = PlaywrightTimeoutError("Timeout")
     form_url = "https://example.com/form"
 
@@ -93,9 +98,8 @@ async def test_submit_listings_all_fail(caplog: LogCaptureFixture, sample_listin
 
 
 @pytest.mark.asyncio
-async def test_submit_single_listing_flow_order() -> None:
+async def test_submit_single_listing_flow_order(mock_page: AsyncMock) -> None:
     """Test that form submission follows the correct sequence of operations."""
-    mock_page = AsyncMock()
     listing = PropertyListing(address="Test Address", price="$1,000", median_price="1000", link="https://test.com")
     form_url = "https://example.com/form"
 
@@ -132,9 +136,8 @@ async def test_submit_single_listing_flow_order() -> None:
     ids=["empty_list", "none"],
 )
 @pytest.mark.asyncio
-async def test_submit_listings_with_empty_list(caplog: LogCaptureFixture, empty_list_arg: list | None) -> None:
+async def test_submit_listings_with_empty_list(mock_page: AsyncMock, caplog: LogCaptureFixture, empty_list_arg: list | None) -> None:
     """Test that submit_listings handles empty list gracefully."""
-    mock_page = AsyncMock()
     form_url = "https://example.com/form"
     empty_listings: list[PropertyListing] = empty_list_arg  # type: ignore[assignment]
 

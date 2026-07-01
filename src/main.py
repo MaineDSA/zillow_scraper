@@ -30,9 +30,6 @@ async def scrape_listings(context: BrowserContext, config: Config) -> list[Prope
 
         await page.goto(config.search_url)
         await simulate_human_behavior(page)
-        if await page.get_by_text("Press & Hold").count() > 0:
-            error_msg = "CAPTCHA detected, cannot continue."
-            raise BaseException(error_msg)
 
         await close_modal_if_present(page)
         await simulate_human_behavior(page)
