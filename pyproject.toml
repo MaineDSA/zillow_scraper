@@ -8,7 +8,7 @@ dependencies = [
     "beautifulsoup4~=4.15.0",
     "google-auth~=2.55.0",
     "gspread~=6.2.1",
-    "patchright~=1.60.1",
+    "patchright>=1.60.1,<1.62.0",
     "python-dotenv~=1.2.2",
     "tqdm~=4.68.3",
 ]
