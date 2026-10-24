@@ -132,14 +132,13 @@ async def test_submit_single_listing_flow_order() -> None:
     ids=["empty_list", "none"],
 )
 @pytest.mark.asyncio
-async def test_submit_listings_with_empty_list(caplog: LogCaptureFixture, empty_list_arg: list | None) -> None:
+async def test_submit_listings_with_empty_list(caplog: LogCaptureFixture, empty_list_arg: list[PropertyListing] | None) -> None:
     """Test that submit_listings handles empty list gracefully."""
     mock_page = AsyncMock()
     form_url = "https://example.com/form"
-    empty_listings: list[PropertyListing] = empty_list_arg  # type: ignore[assignment]
 
     with caplog.at_level(logging.WARNING):
-        await submit_listings(mock_page, form_url, empty_listings)
+        await submit_listings(mock_page, form_url, empty_list_arg)
 
         assert "No listings to submit" in caplog.text
         mock_page.goto.assert_not_called()

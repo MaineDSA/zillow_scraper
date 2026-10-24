@@ -22,6 +22,7 @@ repos:
         language: system
         pass_filenames: true
         types: [python]
+        exclude: tests/*
 
       - id: ty
         name: ty check

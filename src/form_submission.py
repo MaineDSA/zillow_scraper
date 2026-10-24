@@ -35,7 +35,7 @@ async def _submit_single_listing(page: Page, url: str, listing: PropertyListing)
     await simulate_human_behavior(page)
 
 
-async def submit_listings(page: Page, form_url: str, listings: list[PropertyListing]) -> None:
+async def submit_listings(page: Page, form_url: str, listings: list[PropertyListing] | None) -> None:
     """Submit all listings to the Google Form with progress tracking."""
     if not listings:
         logger.warning("No listings to submit")
