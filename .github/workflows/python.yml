@@ -17,6 +17,9 @@ jobs:
     permissions:
       contents: write
       security-events: write
+    with:
+      use_ty: false
+      use_mypy: true
 
   test:
     uses: bmos/bmos/.github/workflows/python-test.yml@main
