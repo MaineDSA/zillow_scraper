@@ -1,6 +1,6 @@
 """Form submission handling for property listings."""
 
-import datetime
+import datetime as dt
 import logging
 from pathlib import Path
 from random import SystemRandom
@@ -49,7 +49,7 @@ class SheetsSubmitter:
         try:
             sheet = self.client.open_by_url(sheet_url)
             worksheet = sheet.worksheet(worksheet_name)
-            now = datetime.datetime.now(tz=datetime.UTC)
+            now = dt.datetime.now(tz=dt.UTC)
             timestamp = f"{now.month}/{now.day}/{now.year} {now.hour}:{now.minute:02d}:{now.second:02d}"
             date = str(now.date())
 
