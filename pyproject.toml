@@ -62,7 +62,7 @@ test = [
     "pytest>=9.1",
 ]
 types = [
-    "mypy>=2.4",
+    "ty>=0.0.91",
     "types-beautifulsoup4>=4.12,<5",
     "types-tqdm>=4.70,<5",
 ]
