@@ -23,6 +23,10 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s:zillow_scraper:%(n
 logger = logging.getLogger(__name__)
 
 
+class CaptchaError(Exception):
+    """A CAPTCHA was detected and the program cannot continue."""
+
+
 async def scrape_listings(context: BrowserContext, config: Config) -> list[PropertyListing]:
     """Scrape and deduplicate listings from Zillow."""
     async with get_browser_page(context) as page:
@@ -32,7 +36,7 @@ async def scrape_listings(context: BrowserContext, config: Config) -> list[Prope
         await simulate_human_behavior(page)
         if await page.get_by_text("Press & Hold").count() > 0:
             error_msg = "CAPTCHA detected, cannot continue."
-            raise BaseException(error_msg)
+            raise CaptchaError(error_msg)
 
         await close_modal_if_present(page)
         await simulate_human_behavior(page)

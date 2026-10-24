@@ -66,7 +66,7 @@ class TestSheetsSubmitter:
         mock_sheet.worksheet.return_value = mock_worksheet
         cast("MagicMock", submitter.client.open_by_url).return_value = mock_sheet
 
-        with patch("src.sheets_submission.datetime") as mock_datetime:
+        with patch("src.sheets_submission.dt") as mock_dt:
             mock_now = MagicMock()
             mock_now.month = 12
             mock_now.day = 21
@@ -75,8 +75,8 @@ class TestSheetsSubmitter:
             mock_now.minute = 30
             mock_now.second = 45
             mock_now.date.return_value = date(2025, 12, 21)
-            mock_datetime.datetime.now.return_value = mock_now
-            mock_datetime.UTC = UTC
+            mock_dt.datetime.now.return_value = mock_now
+            mock_dt.UTC = UTC
 
             submitter.submit_listings(listings=sample_listings, sheet_url="http://example.com", append=True)
 
