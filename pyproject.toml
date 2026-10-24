@@ -6,7 +6,7 @@ requires-python = ">=3.11"
 license = { file = "LICENSE" }
 dependencies = [
     "beautifulsoup4~=4.15.0",
-    "google-auth~=2.55.1",
+    "google-auth>=2.55.1,<2.63.0",
     "gspread~=6.2.1",
     "patchright~=1.61.1",
     "python-dotenv~=1.2.2",
