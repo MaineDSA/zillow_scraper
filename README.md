@@ -5,7 +5,8 @@
 
 # Zillow Clone Scraper
 
-This Python script scrapes apartment listings from a Zillow clone site and optionally submits the address, price, and link of each listing into a Google Form or Google Sheet.
+This Python script scrapes apartment listings from a Zillow clone site and optionally submits the
+address, price, and link of each listing into a Google Form or loads them directly into a Google Sheet.
 
 ## Features
 
@@ -38,7 +39,9 @@ This Python script scrapes apartment listings from a Zillow clone site and optio
     SHEET_NAME=<NAME OF SHEET IN GOOGLE SHEETS DOC TO ADD TO (OPTIONAL)>
     ```
 
-1. If using batch submission to a Google Sheet, add your [Google Service Worker authentication file](https://docs.gspread.org/en/latest/oauth2.html#for-bots-using-service-account) in the project root as ".service_account.json".
+1. If using batch submission to a Google Sheet, add your
+   [Google Service Worker authentication file](https://docs.gspread.org/en/latest/oauth2.html#for-bots-using-service-account)
+   in the project root as ".service_account.json".
 
 1. Run the script:
 
