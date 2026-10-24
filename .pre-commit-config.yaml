@@ -22,7 +22,7 @@ repos:
         language: system
         pass_filenames: true
         types: [python]
-        exclude: tests/*
+        exclude: tests/.+
 
       - id: mypy
         name: mypy
@@ -30,6 +30,7 @@ repos:
         language: system
         pass_filenames: true
         types: [python]
+        files: (test|src)/.+
 
       - id: ruff-check
         name: ruff check
