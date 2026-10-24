@@ -5,12 +5,12 @@ readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
 dependencies = [
-    "beautifulsoup4~=4.15.0",
-    "google-auth~=2.55.1",
-    "gspread~=6.2.1",
-    "patchright~=1.61.1",
-    "python-dotenv~=1.2.2",
-    "tqdm~=4.68.3",
+    "beautifulsoup4>=4.15,<5",
+    "google-auth>=2.62,<3",
+    "gspread>=6.2,<7",
+    "patchright>=1.64,<2",
+    "python-dotenv>=1.2,<2",
+    "tqdm>=4.70,<5",
 ]
 classifiers = [
   "License :: OSI Approved :: MIT License",
@@ -43,28 +43,28 @@ dev = [
     {include-group = "types"},
 ]
 lint = [
-    "ruff==0.15.20",
-    "ssort==0.16.0",
+    "ruff~=0.17.2",
+    "ssort>=0.17.0",
 ]
 pre-commit = [
-    "pre-commit~=4.6.0",
+    "pre-commit>=4.7.0",
 ]
 security = [
-    "bandit[sarif]==1.9.4",
+    "bandit[sarif]~=1.9.4",
 ]
 test-coverage = [
-    "pytest-cov~=7.1.0",
+    "pytest-cov>=7.1.0",
     {include-group = "test"},
 ]
 test = [
-    "pytest-asyncio~=1.4.0",
-    "pytest-xdist~=3.8.0",
-    "pytest~=9.1.1",
+    "pytest-asyncio>=1.4",
+    "pytest-xdist>=3.8",
+    "pytest>=9.1",
 ]
 types = [
-    "mypy~=2.1.0",
-    "types-beautifulsoup4~=4.12.0",
-    "types-tqdm~=4.68.0",
+    "mypy>=2.4",
+    "types-beautifulsoup4>=4.12,<5",
+    "types-tqdm>=4.70,<5",
 ]
 
 [tool]
