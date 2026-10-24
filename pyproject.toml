@@ -64,7 +64,7 @@ test = [
 types = [
     "mypy~=2.1.0",
     "types-beautifulsoup4~=4.12.0",
-    "types-tqdm~=4.68.0",
+    "types-tqdm>=4.68,<4.71",
 ]
 
 [tool]
