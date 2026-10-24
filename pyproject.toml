@@ -47,7 +47,7 @@ lint = [
     "ssort==0.16.0",
 ]
 pre-commit = [
-    "pre-commit~=4.6.0",
+    "pre-commit>=4.6,<4.8",
 ]
 security = [
     "bandit[sarif]==1.9.4",
