@@ -10,7 +10,7 @@ dependencies = [
     "gspread~=6.2.1",
     "patchright~=1.61.1",
     "python-dotenv~=1.2.2",
-    "tqdm~=4.68.3",
+    "tqdm>=4.68.3,<4.71.0",
 ]
 classifiers = [
   "License :: OSI Approved :: MIT License",
