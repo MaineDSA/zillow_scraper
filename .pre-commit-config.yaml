@@ -18,10 +18,11 @@ repos:
       - id: bandit
         name: bandit
         entry: uv run bandit
-        args: [--confidence-level medium, --severity-level medium, --exclude tests]
+        args: [--confidence-level medium, --severity-level medium]
         language: system
         pass_filenames: true
         types: [python]
+        exclude: tests/.+
 
       - id: ssort
         name: ssort
