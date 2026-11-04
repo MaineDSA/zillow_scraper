@@ -156,17 +156,20 @@ class ZillowCardParser:
         # the price text (e.g. "$1,608+ 2 bdsFees may apply"). Instead, grab only
         # the first nested span which contains the actual price string.
         inner_span = main_price_element.find("span")
-        if inner_span and not isinstance(inner_span, Tag):
+        if not isinstance(inner_span, Tag) and inner_span is not None:
             msg = f"inner_span type is incorrect: {type(inner_span)}"
             raise TypeError(msg)
 
         price_span = inner_span.find("span") if inner_span else None
-        if price_span and not isinstance(price_span, Tag):
+        if not isinstance(price_span, Tag) and price_span is not None:
             msg = f"price_span type is incorrect: {type(price_span)}"
             raise TypeError(msg)
 
-        raw_text = (price_span or inner_span or main_price_element).get_text(strip=True)
+        element_to_extract = price_span or inner_span or main_price_element
+        if element_to_extract is None or not hasattr(element_to_extract, "get_text"):
+            return []
 
+        raw_text = element_to_extract.get_text(strip=True)
         price_text = self._clean_price_text(raw_text)
         if not price_text:
             return []
