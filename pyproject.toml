@@ -18,6 +18,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Natural Language :: English",
 ]
 
@@ -29,8 +30,8 @@ zillow_scraper = "src.main:main"
 
 [build-system]
 requires = [
-    "build>=1.4",
-    "setuptools>=82.0",
+    "build>=1.6.1",
+    "setuptools>=84.2.1",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -43,8 +44,8 @@ dev = [
     {include-group = "types"},
 ]
 lint = [
-    "ruff~=0.17.2",
-    "ssort>=0.17.0",
+    "ruff~=0.17.3",
+    "ssort>=0.19.0",
 ]
 pre-commit = [
     "pre-commit>=4.7.0",
@@ -62,9 +63,9 @@ test = [
     "pytest>=9.1",
 ]
 types = [
-    "mypy>=2.1",
-    "types-beautifulsoup4>=4.12,<5",
-    "types-tqdm>=4.70,<5",
+    "ty>=0.0.97",
+    "types-beautifulsoup4>=4.12.0.20250516,<5",
+    "types-tqdm>=4.70.0.20261102,<5",
 ]
 
 [tool]
@@ -149,23 +150,10 @@ ignore = [
 addopts = ["-n", "auto", "--cov=src", "--no-cov-on-fail"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "module"
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
 
 [tool.coverage]
 
 [tool.coverage.run]
 branch = true
 relative_files = true
-
-[tool.coverage.report]
-exclude_also = [
-    "logger\\.",
-    'if __name__ == "__main__":',
-    "main\\(\\)",
-]
-
-[tool.mypy]
-local_partial_types = true
-strict_bytes = true
