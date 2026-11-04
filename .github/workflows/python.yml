@@ -14,19 +14,18 @@ permissions: read-all
 jobs:
   lint:
     uses: bmos/bmos/.github/workflows/python-lint.yml@main
+    with:
+      run_ty: true
+      run_mypy: false
     permissions:
       contents: write
       security-events: write
-    with:
-      run_ty: false
-      run_mypy: true
 
   test:
     uses: bmos/bmos/.github/workflows/python-test.yml@main
     needs: lint
     with:
-      install_patchright: true
-      python_version: "['3.11', '3.12', '3.13', '3.14']"
+      python_version: "['3.11', '3.12', '3.13', '3.14', '3.15']"
     permissions:
       contents: write
       pull-requests: write
